@@ -7,4 +7,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+RUN chmod u+x ./entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
