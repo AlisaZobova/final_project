@@ -26,7 +26,7 @@ del_volume:
 	sudo docker volume prune
 
 del_network:
-	sudo docker volume network
+	sudo docker network prune
 
 ps_a:
 	sudo docker ps -a

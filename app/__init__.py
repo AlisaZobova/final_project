@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from config import Config
 from app import models
 from app.models.db_init import DATABASE
+from app.commands import cmd
 
 
 MIGRATE = Migrate()
@@ -15,5 +16,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     DATABASE.init_app(app)
+    app.register_blueprint(cmd, cli_group=None)
     MIGRATE.init_app(app, DATABASE)
     return app
