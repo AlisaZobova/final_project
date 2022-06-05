@@ -1,10 +1,10 @@
 """Module with base CRUD realisation"""
 
-from typing import Any, Dict, Generic, List, Optional, Type, Union
+from typing import Any, Dict, Generic, List, Optional, Union
 from fastapi.encoders import jsonable_encoder
 from app.models.db_init import DATABASE
 from .abstract import CRUDAbstract, ModelType, CreateSchemaType, \
-                      UpdateSchemaType, BaseSchemaType, ListSchemaType
+                      UpdateSchemaType, BaseSchemaType
 
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstract):
@@ -15,11 +15,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
     * `schema`: A Pydantic model (schema) class
     * `list_schema`: A list of Pydantic models
     """
-    def __init__(self, model: Type[ModelType], schema: Type[BaseSchemaType],
-                 list_schema: Type[ListSchemaType]):
-        self.model = model
-        self.schema = schema
-        self.list_schema = list_schema
 
     def get(self, database: DATABASE.session, record_id: Any) -> Optional[BaseSchemaType]:
         """Method to read one record by id"""

@@ -1,4 +1,5 @@
 """Module with film pydentic schemas"""
+
 from datetime import date
 from typing import Optional, List
 from pydantic import BaseModel, HttpUrl, constr, confloat
