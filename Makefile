@@ -2,13 +2,13 @@ create_db:
 	sudo docker-compose exec database psql -U postgres -c "CREATE DATABASE film_library;"
 
 migrate:
-	python3 migrate.py db migrate
+	flask db migrate
 
 upgrade:
-	python3 migrate.py db upgrade
+	flask db upgrade
 
 downgrade:
-	python3 migrate.py db downgrade
+	flask db downgrade
 
 up_d:
 	sudo docker compose up -d
@@ -22,11 +22,23 @@ stop:
 rm:
 	sudo docker rm -f $(sudo docker ps -a -q)
 
-volume:
+del_volume:
 	sudo docker volume prune
 
-network:
+del_network:
 	sudo docker volume network
 
 ps_a:
 	sudo docker ps -a
+
+used_memory:
+	sudo docker system df
+
+del_images:
+	sudo docker rmi $(sudo docker images -a -q)
+
+del_cache:
+	sudo docker builder prune
+
+freeze:
+	pip freeze > requirements.txt
