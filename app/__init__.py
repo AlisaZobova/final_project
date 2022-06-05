@@ -3,8 +3,8 @@
 from flask import Flask
 from flask_migrate import Migrate
 from config import Config
-from .. import models
-from models.db_init import DATABASE
+from app import models
+from app.models.db_init import DATABASE
 
 
 MIGRATE = Migrate()
