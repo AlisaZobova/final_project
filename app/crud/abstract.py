@@ -1,7 +1,7 @@
 """Module with abstract CRUD realisation"""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar, Union, Type
 from pydantic import BaseModel
 from app.models.db_init import DATABASE
 
@@ -16,6 +16,13 @@ class CRUDAbstract(ABC):
     """
     CRUD class with abstract methods to Create, Read, Update, Delete (CRUD).
     """
+
+    def __init__(self, model: Type[ModelType], schema: Type[BaseSchemaType],
+                 list_schema: Type[ListSchemaType]):
+        self.model = model
+        self.schema = schema
+        self.list_schema = list_schema
+
     @abstractmethod
     def get(self, database: DATABASE.session, record_id: Any) -> Optional[BaseSchemaType]:
         """Method to read one record by id"""
