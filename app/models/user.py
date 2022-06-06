@@ -11,7 +11,7 @@ class User(DATABASE.Model):
     name = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
     email = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
     password = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
-    films = DATABASE.relationship('Film', backref=DATABASE.backref('user'))
+    films = DATABASE.relationship('Film', backref='user', cascade='all, delete')
 
     def __str__(self):
         return f'User {self.user_id}: {self.name} - {self.email}'

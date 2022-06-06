@@ -15,20 +15,6 @@ class FilmAbstract(ABC):
         """A method that searches for a partial match of a movie title"""
 
     @abstractmethod
-    def query_film_filter(
-            self, database: DATABASE.session, column_name: str,
-            value: str, page=1, per_page=10
-    ):
-        """Method for filtering records by release_date, genres and directors"""
-
-    @abstractmethod
-    def query_film_sort(
-            self, database: DATABASE.session, column_name: str,
-            page=1, per_page=10, order: str = 'ASC'
-    ):
-        """Method for sorting records by release_date and rating"""
-
-    @abstractmethod
     def query_film_multy_filter(
             self, database: DATABASE.session,
             values: List[str], page=1, per_page=10
@@ -37,7 +23,7 @@ class FilmAbstract(ABC):
 
     @abstractmethod
     def query_film_multy_sort(
-            self, database: DATABASE.session, page=1,
-            per_page=10, order: str = 'ASC'
+            self, database: DATABASE.session, order: List[str],
+            page=1, per_page=10
     ):
         """Method for sorting records by release_date and rating"""
