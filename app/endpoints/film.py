@@ -12,7 +12,7 @@ from app.domain import create_film, read_films, set_unknown_director_multy, \
 from app.models import Film, Role
 
 
-@API.route('/film/<int:film_id>', endpoint='film')
+@API.route('/film/<int:film_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='film')
 @API.route('/film', methods=['POST'], endpoint='film_create')
 @API.doc(params={'film_id': 'An ID'})
 class FilmBase(Resource):
@@ -67,8 +67,9 @@ class FilmBase(Resource):
         return access
 
 
-@API.route('/films/<int:page>', methods=['GET'], defaults={'per_page': 10}, endpoint='films_default')
-@API.route('/films/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_per_page')
+@API.route('/film/all/<int:page>', methods=['GET'], defaults={'per_page': 10}, endpoint='films_default')
+@API.route('/film/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_per_page')
+@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Films(Resource):
     """Class for implementing films get multy request"""
     def get(self, page, per_page):
@@ -77,9 +78,10 @@ class Films(Resource):
         return jsonify(set_unknown_director_multy(films)['__root__'])
 
 
-@API.route('/films/<string:title>/<int:page>', methods=['GET'],
+@API.route('/film/<string:title>/<int:page>', methods=['GET'],
            defaults={'per_page': 10}, endpoint='films_title_default')
-@API.route('/films/<string:title>/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_title_per_page')
+@API.route('/film/<string:title>/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_title_per_page')
+@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page', 'title': "Part of the film's title"})
 class FilmsTitle(Resource):
     """Class for implementing films get multy request"""
     def get(self, page, per_page, title):
@@ -88,28 +90,38 @@ class FilmsTitle(Resource):
         return jsonify(set_unknown_director_multy(films)['__root__'])
 
 
-@API.route('/films/filter/<int:page>', methods=['GET'],
-           defaults={'per_page': 10}, endpoint='films_filter_default')
-@API.route('/films/filter/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_filter')
+@API.route('/film/filter/<string:release_date>/<string:directors>/<string:genres>/<int:page>',
+           defaults={'per_page': 10}, methods=['GET'], endpoint='films_filter_default')
+@API.route('/film/filter/<string:release_date>/<string:directors>/<string:genres>/<int:page>/<int:per_page>',
+           methods=['GET'], endpoint='films_filter')
+@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page',
+                 'release_date': 'Release year range', 'directors': 'Names and surnames of directors',
+                 'genres': 'Genre names'})
 class FilmsFiltered(Resource):
     """Class for implementing films get multy filtered request"""
-    def get(self, page, per_page):
+    def get(self, release_date, directors, genres, page, per_page):
         """Processing a get multy filtered request"""
-        data = [request.args.get('release_date', default=None),
-                request.args.get('directors', default=None),
-                request.args.get('genres', default=None)]
+        data = [release_date, directors, genres]
+        for i in range(len(data)):
+            if data[i] == 'None':
+                data[i] = None
         films = query_film_multy_filter(film_crud=FILM, values=data, page=page, per_page=per_page).dict()
         return jsonify(set_unknown_director_multy(films)['__root__'])
 
 
-@API.route('/films/sort/<int:page>', methods=['GET'],
+@API.route('/film/sort/<string:release_date>/<string:rating>/<int:page>', methods=['GET'],
            defaults={'per_page': 10}, endpoint='films_sort_default')
-@API.route('/films/sort/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_sort')
+@API.route('/film/sort/<string:release_date>/<string:rating>/<int:page>/<int:per_page>',
+           methods=['GET'], endpoint='films_sort')
+@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page',
+                 'release_date': 'Sort order by release date', 'rating': 'Sort order by rating'})
 class FilmsSorted(Resource):
     """Class for implementing films get multy sorted request"""
-    def get(self, page: int, per_page: int):
+    def get(self, rating, release_date, page: int, per_page: int):
         """Processing a get multy sorted request"""
-        order = [request.args.get('release_date', default=None),
-                 request.args.get('rating', default=None)]
+        order = [release_date, rating]
+        for i in range(len(order)):
+            if order[i] == 'None':
+                order[i] = None
         films = query_film_multy_sort(film_crud=FILM, page=page, per_page=per_page, order=order).dict()
         return jsonify(set_unknown_director_multy(films)['__root__'])

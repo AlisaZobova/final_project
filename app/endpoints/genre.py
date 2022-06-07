@@ -6,7 +6,7 @@ from app.crud import GENRE
 from app.endpoints.todo import API, TODO
 
 
-@API.route('/genre/<int:genre_id>', endpoint='genre')
+@API.route('/genre/<int:genre_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='genre')
 @API.route('/genre', methods=['POST'], endpoint='genre_create')
 @API.doc(params={'genre_id': 'An ID'})
 class Genre(Resource):
@@ -28,9 +28,10 @@ class Genre(Resource):
         return TODO.delete(record_id=genre_id, crud=GENRE)
 
 
-@API.route('/genres/<int:page>', methods=['GET'],
+@API.route('/genre/all/<int:page>', methods=['GET'],
            defaults={'per_page': 10}, endpoint='genres_default')
-@API.route('/genres/<int:page>/<int:per_page>', methods=['GET'], endpoint='genres')
+@API.route('/genre/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='genres')
+@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Genres(Resource):
     """Class for implementing genres get multy request"""
     def get(self, page, per_page):
