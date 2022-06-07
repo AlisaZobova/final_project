@@ -63,114 +63,88 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
                  .filter(self.model.title.ilike(title))
                  .order_by(self.model.film_id.asc()), page=page, per_page=per_page)])
 
-    def query_film_filter(
-            self, database: DATABASE.session, column_name: str,
-            value: str, page=1, per_page=10
-    ):
-        """Method for filtering records by release_date or genres or directors"""
-        if column_name == 'release_date':
-            start_year, end_year = value.split('-')
-            return self.list_schema.from_orm(
-                [self.schema.from_orm(item) for item in
-                 self.query_paginate(
-                     self.multy_query(database).filter(extract('year', self.model.release_date)
-                                                       .between(start_year, end_year))
-                     .order_by(self.model.film_id.asc()), page=page, per_page=per_page)])
-        if column_name == 'genres':
-            genres_names = value.split('&')
-            return self.list_schema.from_orm(
-                [self.schema.from_orm(item) for item in
-                 self.query_paginate(
-                     self.multy_query(database).distinct().filter(
-                         or_(*[self.model.genres
-                               .contains(genre) for genre in database.query(Genre).filter(
-                                   Genre.genre_name.in_(genres_names)).all()])),
-                     page=page, per_page=per_page)])
-        if column_name == 'directors':
-            directors_names = value.split('&')
-            return self.list_schema.from_orm(
-                [self.schema.from_orm(item) for item in
-                 self.query_paginate(
-                     self.multy_query(database).filter(
-                         or_(*[self.model.directors
-                               .contains(director) for director in database.query(Director).filter(
-                                   ((Director.name + '_' + Director.surname)
-                                    .in_(directors_names))).all()])),
-                     page=page, per_page=per_page)])
+    def date_filter(self, query, value):
+        """Method for filtering by release date"""
+        start_year, end_year = value.split('-')
+        return query.filter(extract('year', self.model.release_date)
+                         .between(start_year, end_year))
 
-        return None
+    def director_filter(self, query, value, database):
+        """Method for filtering by directors"""
+        directors_names = value.split('&')
+        return query.filter(
+                     or_(*[self.model.directors
+                           .contains(director) for director in database.query(Director).filter(
+                               ((Director.name + '_' + Director.surname)
+                                .in_(directors_names))).all()]))
 
-    def query_film_sort(
-            self, database: DATABASE.session, column_name: str,
-            page=1, per_page=10, order: str = 'asc'
-    ):
-        """Method for sorting records by release_date or rating"""
-        if column_name in ['rating', 'release_date']:
-            if order == 'asc':
-                return self.list_schema.from_orm(
-                    [self.schema.from_orm(item) for item in
-                     self.query_paginate(
-                         self.multy_query(database).order_by(
-                             self.model.__table__.columns[column_name].asc()),
-                         page=page, per_page=per_page)])
-            if order == 'desc':
-                return self.list_schema.from_orm(
-                    [self.schema.from_orm(item) for item in
-                     self.query_paginate(
-                         self.multy_query(database).order_by(
-                             self.model.__table__.columns[column_name].desc()),
-                         page=page, per_page=per_page)])
-
-        return None
+    def genre_filter(self, query, value, database):
+        """Method for filtering by genres"""
+        genres_names = value.split('&')
+        return query.filter(
+                    or_(*[self.model.genres
+                        .contains(genre) for genre in database.query(Genre).filter(
+                        Genre.genre_name.in_(genres_names)).all()]))
 
     def query_film_multy_filter(
             self, database: DATABASE.session,
             values: List[str], page=1, per_page=10
     ):
         """Method for filtering records by genres, release_date and directors"""
-        genres_names = values[0].split('&')
-        start_year, end_year = values[1].split('-')
-        directors_names = values[2].split('&')
+        query = database.query(self.model).distinct()
+
+        if values[0] is not None:
+            query = self.date_filter(query=query, value=values[0])
+        if values[1] is not None:
+            query.join(Director, Film.directors)
+            query = self.director_filter(query=query, value=values[1], database=database)
+        if values[2] is not None:
+            query.join(Genre, Film.genres)
+            query = self.genre_filter(query=query, value=values[2], database=database)
+
         return self.list_schema.from_orm(
-            [self.schema.from_orm(item) for item in database.query(Film)
-             .join(Genre, Film.genres)
-             .join(Director, Film.directors)
-             .filter(
-                 or_(*[self.model.genres
-                       .contains(genre) for genre in database.query(Genre).filter(
-                           Genre.genre_name.in_(genres_names)).all()]))
-             .filter(extract('year', self.model.release_date)
-                     .between(start_year, end_year))
-             .filter(
-                 or_(*[self.model.directors
-                       .contains(director) for director in database.query(Director).filter(
-                           ((Director.name + '_' + Director.surname)
-                            .in_(directors_names))).all()]))
+            [self.schema.from_orm(item) for item in query
              .order_by(self.model.film_id.asc())
-             .paginate(page=page, per_page=per_page).items]
-        )
+             .paginate(page=page, per_page=per_page).items])
+
+    def date_asc(self, query):
+        """Method to sort by date in ascending order"""
+        return query.order_by(self.model.release_date.asc())
+
+    def date_desc(self, query):
+        """Method to sort by date in descending order"""
+        return query.order_by(self.model.release_date.desc())
+
+    def rating_asc(self, query):
+        """Method to sort by rating in ascending order"""
+        return query.order_by(self.model.rating.asc())
+
+    def rating_desc(self, query):
+        """Method to sort by rating in descending order"""
+        return query.order_by(self.model.rating.desc())
 
     def query_film_multy_sort(
-            self, database: DATABASE.session, page=1,
-            per_page=10, order: str = 'asc'
+            self, database: DATABASE.session, order: List[str],
+            page: int = 1, per_page: int = 10
     ):
         """Method for sorting records by release_date and rating"""
-        if order == 'asc':
-            return self.list_schema.from_orm(
-                [self.schema.from_orm(item) for item in
-                 self.query_paginate(
-                     self.multy_query(database).order_by(
-                         self.model.release_date.asc(), self.model.rating.asc()),
-                     page=page, per_page=per_page)])
-        if order == 'desc':
-            return self.list_schema.from_orm(
-                [self.schema.from_orm(item) for item in
-                 self.query_paginate(
-                     self.multy_query(database).order_by(
-                         self.model.release_date.desc(), self.model.rating.desc()),
-                     page=page, per_page=per_page)])
+        query = self.multy_query(database)
 
-        return None
+        if order[0] is not None:
+            if order[0] == 'asc':
+                query = self.date_asc(query)
+            if order[0] == 'desc':
+                query = self.date_desc(query)
+
+        if order[1] is not None:
+            if order[1] == 'asc':
+                query = self.rating_asc(query)
+            if order[1] == 'desc':
+                query = self.rating_desc(query)
+
+        return self.list_schema.from_orm(
+            [self.schema.from_orm(item) for item in
+             self.query_paginate(query, page=page, per_page=per_page)])
 
 
 FILM = CRUDFilm(Film, FilmBase, FilmList)
