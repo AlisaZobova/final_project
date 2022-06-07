@@ -12,7 +12,7 @@ class Film(DATABASE.Model):
     user_id = DATABASE.Column(DATABASE.Integer, DATABASE.ForeignKey(
         'user.user_id', ondelete='CASCADE'), nullable=False)
     title = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
-    poster = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
+    poster = DATABASE.Column(DATABASE.VARCHAR(255), nullable=False)
     description = DATABASE.Column(DATABASE.Text)
     release_date = DATABASE.Column(DATABASE.Date, nullable=False)
     rating = DATABASE.Column(DATABASE.Float, nullable=False)

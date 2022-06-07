@@ -1,19 +1,21 @@
 """Endpoints for film"""
 import json
 
-from flask import request, jsonify
+from flask import request, jsonify, current_app
+from flask_login import current_user
 from flask_restx import Resource
 
 from app.crud import FILM
 from app.endpoints.todo import API, TODO
 from app.domain import create_film, read_films, set_unknown_director_multy, \
     query_film_multy_sort, query_film_multy_filter, set_unknown_director, get_multi_by_title
+from app.models import Film, Role
 
 
 @API.route('/film/<int:film_id>', endpoint='film')
 @API.route('/film', methods=['POST'], endpoint='film_create')
 @API.doc(params={'film_id': 'An ID'})
-class Film(Resource):
+class FilmBase(Resource):
     """Class for implementing film HTTP requests"""
     def get(self, film_id):
         """Processing a get request"""
@@ -22,6 +24,8 @@ class Film(Resource):
 
     def post(self):
         """Processing a post request"""
+        if not current_user.is_authenticated:
+            return current_app.login_manager.unauthorized()
         directors_id = request.args.get('directors')
         genres_id = request.args.get('genres')
         values = {
@@ -30,21 +34,37 @@ class Film(Resource):
             'description': request.args.get('description', default='Film has no description.'),
             'release_date': request.args.get('release_date'),
             'rating': request.args.get('rating'),
-            'user_id': request.args.get('user_id')
+            'user_id': current_user.user_id
         }
         return create_film(FILM, values=values,
                                    directors_id=directors_id,
                                    genres_id=genres_id)
 
+    def del_put_access(self, film_id):
+        if not current_user.is_authenticated:
+            return current_app.login_manager.unauthorized()
+        db_film = Film.query.get(film_id)
+        admin = Role.query.filter_by(name='admin').first()
+        if db_film.user_id != current_user.user_id and current_user.role_id != admin.role_id:
+            return "Only the user who added the film or an administrator " \
+                   "can make changes to a film. Access denied."
+        return True
+
     def put(self, film_id):
         """Processing a put request"""
-        film = TODO.update(record_id=film_id, crud=FILM)
-        return set_unknown_director(film)
+        access = self.del_put_access(film_id=film_id)
+        if access is True:
+            film = TODO.update(record_id=film_id, crud=FILM)
+            return set_unknown_director(film)
+        return access
 
     def delete(self, film_id):
         """Processing a delete request"""
-        film = TODO.delete(record_id=film_id, crud=FILM)
-        return set_unknown_director(film)
+        access = self.del_put_access(film_id=film_id)
+        if access is True:
+            film = TODO.delete(record_id=film_id, crud=FILM)
+            return set_unknown_director(film)
+        return access
 
 
 @API.route('/films/<int:page>', methods=['GET'], defaults={'per_page': 10}, endpoint='films_default')
