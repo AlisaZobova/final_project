@@ -79,7 +79,7 @@ def get_multi_by_title(film_crud: FilmAbstract, title: str, page: int = 1, per_p
 
 
 def query_film_multy_filter(
-        film_crud: FilmAbstract, values: List[str],
+        film_crud: FilmAbstract, values: List[Union[str, None]],
         page: int = 1, per_page: int = 10
 ):
     """Method for filtering records by genres, release_date and directors"""
@@ -89,7 +89,7 @@ def query_film_multy_filter(
 
 
 def query_film_multy_sort(
-        film_crud: FilmAbstract, order: List[str],
+        film_crud: FilmAbstract, order: List[Union[str, None]],
         page: int = 1, per_page: int = 10
 ):
     """Method for sorting records by release_date and rating"""

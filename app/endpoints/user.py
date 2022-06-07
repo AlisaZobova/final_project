@@ -6,7 +6,7 @@ from app.crud import USER
 from app.endpoints.todo import API, TODO
 
 
-@API.route('/user/<int:user_id>', endpoint='user')
+@API.route('/user/<int:user_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='user')
 @API.route('/user', methods=['POST'], endpoint='user_create')
 @API.doc(params={'user_id': 'An ID'})
 class User(Resource):
@@ -28,9 +28,10 @@ class User(Resource):
         return TODO.delete(record_id=user_id, crud=USER)
 
 
-@API.route('/users/<int:page>', methods=['GET'],
+@API.route('/user/all/<int:page>', methods=['GET'],
            defaults={'per_page': 10}, endpoint='users_default')
-@API.route('/users/<int:page>/<int:per_page>', methods=['GET'], endpoint='users')
+@API.route('/user/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='users')
+@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Users(Resource):
     """Class for implementing users get multy request"""
     def get(self, page, per_page):
