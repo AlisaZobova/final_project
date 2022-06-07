@@ -18,7 +18,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """Create schema"""
     role_id: int
-    password: constr(max_length=50)
+    password: constr(max_length=255)
 
 
 class UserUpdate(UserBase):
