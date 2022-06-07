@@ -1,8 +1,8 @@
 """Module with film pydentic schemas"""
-
+import re
 from datetime import date
 from typing import Optional, List
-from pydantic import BaseModel, HttpUrl, constr, confloat
+from pydantic import BaseModel, HttpUrl, constr, confloat, validator
 
 from .genre import GenreBase
 from .director import DirectorBase
@@ -17,6 +17,20 @@ class FilmBase(BaseModel):
     rating: confloat(ge=0, le=10)
     directors: List[DirectorBase]
     genres: List[GenreBase]
+
+    @validator("release_date")
+    def check_date(cls, value):
+        """Check date field"""
+        if value > date.today():
+            raise ValueError("The date has not yet arrived!")
+        return value
+
+    @validator("title")
+    def check_title(cls, value):
+        """Check title field"""
+        if re.match(r'^[A-Z][a-z]*(\s(([A-Z][a-z]*)|([a-z]+)))*(\s[0-9]+)*$', value) is None:
+            raise ValueError("Incorrect title!")
+        return value
 
     class Config:
         """Configuration class"""
