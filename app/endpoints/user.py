@@ -3,12 +3,12 @@
 from flask_restx import Resource
 
 from app.crud import USER
-from app.endpoints.todo import API, TODO
+from app.endpoints.todo import api, TODO
 
 
-@API.route('/user/<int:user_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='user')
-@API.route('/user', methods=['POST'], endpoint='user_create')
-@API.doc(params={'user_id': 'An ID'})
+@api.route('/user/<int:user_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='user')
+@api.route('/user', methods=['POST'], endpoint='user_create')
+@api.doc(params={'user_id': 'An ID'})
 class User(Resource):
     """Class for implementing user HTTP requests"""
     def get(self, user_id):
@@ -28,10 +28,10 @@ class User(Resource):
         return TODO.delete(record_id=user_id, crud=USER)
 
 
-@API.route('/user/all/<int:page>', methods=['GET'],
+@api.route('/user/all/<int:page>', methods=['GET'],
            defaults={'per_page': 10}, endpoint='users_default')
-@API.route('/user/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='users')
-@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
+@api.route('/user/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='users')
+@api.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Users(Resource):
     """Class for implementing users get multy request"""
     def get(self, page, per_page):
