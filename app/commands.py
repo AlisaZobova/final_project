@@ -2,8 +2,8 @@
 
 from faker import Faker
 from flask import Blueprint
-from .crud import DIRECTOR, FILM, GENRE, ROLE, USER
-from .models import Director, Genre
+from .crud import DIRECTOR, FILM, GENRE, USER
+from .models import Director, Genre, Role
 from .models.db_init import DATABASE
 
 CMD = Blueprint('cmd', __name__, cli_group=None)
@@ -19,8 +19,11 @@ def seed_director():
 
 def seed_role():
     """Method for seeding role table"""
-    ROLE.create(database=DATABASE.session(), obj_in={'name': 'user'})
-    ROLE.create(database=DATABASE.session(), obj_in={'name': 'admin'})
+    user_role = Role(**{'name': 'user'})
+    admin_role = Role(**{'name': 'admin'})
+    DATABASE.session.add(user_role)
+    DATABASE.session.add(admin_role)
+    DATABASE.session.commit()
 
 
 def seed_user():
