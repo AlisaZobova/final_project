@@ -1,9 +1,9 @@
 """Main app module"""
 
-from app import create_app
 from flask_cors import CORS
+from app import create_app
 
-app = create_app()
+app = create_app()  # pylint: disable=C0103
 CORS(app)
 
 if __name__ == '__main__':

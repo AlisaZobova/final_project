@@ -3,12 +3,12 @@
 from flask_restx import Resource
 
 from app.crud import ROLE
-from app.endpoints.todo import API, TODO
+from app.endpoints.todo import api, TODO
 
 
-@API.route('/role/<int:role_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='role')
-@API.route('/role', methods=['POST'], endpoint='role_create')
-@API.doc(params={'role_id': 'An ID'})
+@api.route('/role/<int:role_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='role')
+@api.route('/role', methods=['POST'], endpoint='role_create')
+@api.doc(params={'role_id': 'An ID'})
 class Role(Resource):
     """Class for implementing role HTTP requests"""
     def get(self, role_id):
@@ -24,10 +24,10 @@ class Role(Resource):
         return TODO.update(record_id=role_id, crud=ROLE)
 
 
-@API.route('/role/all/<int:page>', methods=['GET'],
+@api.route('/role/all/<int:page>', methods=['GET'],
            defaults={'per_page': 10}, endpoint='roles_default')
-@API.route('/role/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='roles')
-@API.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
+@api.route('/role/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='roles')
+@api.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Roles(Resource):
     """Class for implementing roles get multy request"""
     def get(self, page, per_page):
