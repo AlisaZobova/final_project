@@ -4,11 +4,11 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_login import LoginManager
 
-from app.endpoints.todo import api_bp
+from app.endpoints.todo import API_BP
 from config import Config
 from app import models, endpoints
 from app.models.db_init import DATABASE
-from app.commands import cmd
+from app.commands import CMD
 from app.auth import AUTH
 from app.models import User
 
@@ -21,8 +21,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     DATABASE.init_app(app)
-    app.register_blueprint(cmd, cli_group=None)
-    app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(CMD, cli_group=None)
+    app.register_blueprint(API_BP, url_prefix='/api')
     app.register_blueprint(AUTH)
     MIGRATE.init_app(app, DATABASE)
 

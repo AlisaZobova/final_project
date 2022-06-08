@@ -6,9 +6,9 @@ from flask_restx import Api
 from app.crud.abstract import CRUDAbstract
 from app.domain import read, create, update, delete, read_multy
 
-api_bp = Blueprint('api', __name__)  # pylint: disable=C0103
+API_BP = Blueprint('api', __name__)
 
-api = Api(api_bp)  # pylint: disable=C0103
+API = Api(API_BP)
 
 
 class TodoBase:
@@ -18,7 +18,7 @@ class TodoBase:
         record = read(crud, record_id).dict()
         if record is not None:
             return record
-        api.abort(404, "Record doesn't exist")
+        API.abort(404, "Record doesn't exist")
 
     def create(self, crud: CRUDAbstract):
         """Method for future post request"""
