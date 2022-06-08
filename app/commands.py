@@ -6,7 +6,7 @@ from .crud import DIRECTOR, FILM, GENRE, ROLE, USER
 from .models import Director, Genre
 from .models.db_init import DATABASE
 
-cmd = Blueprint('cmd', __name__, cli_group=None)  # pylint: disable=C0103
+CMD = Blueprint('cmd', __name__, cli_group=None)
 FAKER = Faker()
 
 
@@ -57,7 +57,7 @@ def seed_film():
         )
 
 
-@cmd.cli.command('seed_all')
+@CMD.cli.command('seed_all')
 def seed_all():
     """Method for seeding all tables"""
     seed_role()
