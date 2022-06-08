@@ -9,7 +9,7 @@ class User(UserMixin, DATABASE.Model):
     user_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
     role_id = DATABASE.Column(DATABASE.Integer, DATABASE.ForeignKey('role.role_id'), nullable=False)
     name = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
-    email = DATABASE.Column(DATABASE.VARCHAR(255), nullable=False, unique=True)
+    email = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False, unique=True)
     password = DATABASE.Column(DATABASE.VARCHAR(255), nullable=False)
     films = DATABASE.relationship('Film', backref='user', cascade='all, delete')
 
