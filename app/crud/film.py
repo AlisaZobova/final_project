@@ -66,25 +66,18 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
     def date_filter(self, query, value):
         """Method for filtering by release date"""
         start_year, end_year = value.split('-')
-        return query.filter(extract('year', self.model.release_date)
-                         .between(start_year, end_year))
+        return query.filter(extract('year', self.model.release_date).between(start_year, end_year))
 
-    def director_filter(self, query, value, database):
+    def director_filter(self, query, value):
         """Method for filtering by directors"""
         directors_names = value.split('&')
-        return query.filter(
-                     or_(*[self.model.directors
-                           .contains(director) for director in database.query(Director).filter(
-                               ((Director.name + '_' + Director.surname)
-                                .in_(directors_names))).all()]))
+        return query.filter(self.model.directors
+                            .any((Director.name + '_' + Director.surname).in_(directors_names)))
 
-    def genre_filter(self, query, value, database):
+    def genre_filter(self, query, value):
         """Method for filtering by genres"""
         genres_names = value.split('&')
-        return query.filter(
-                    or_(*[self.model.genres
-                        .contains(genre) for genre in database.query(Genre).filter(
-                        Genre.genre_name.in_(genres_names)).all()]))
+        return query.filter(self.model.genres.any(Genre.genre_name.in_(genres_names)))
 
     def query_film_multy_filter(
             self, database: DATABASE.session,
@@ -96,11 +89,9 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
         if values[0] is not None:
             query = self.date_filter(query=query, value=values[0])
         if values[1] is not None:
-            query.join(Director, Film.directors)
-            query = self.director_filter(query=query, value=values[1], database=database)
+            query = self.director_filter(query=query, value=values[1])
         if values[2] is not None:
-            query.join(Genre, Film.genres)
-            query = self.genre_filter(query=query, value=values[2], database=database)
+            query = self.genre_filter(query=query, value=values[2])
 
         return self.list_schema.from_orm(
             [self.schema.from_orm(item) for item in query
