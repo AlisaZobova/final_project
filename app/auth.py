@@ -1,45 +1,65 @@
 """Module with authentication"""
 
-from flask_restx import Resource, fields
 from flask import request, flash
 from werkzeug.security import check_password_hash
-from flask_login import login_user, login_required, logout_user
+from flask_restx import Resource, fields
+from flask_login import login_user, login_required, logout_user, current_user
 
 from app.models import User
-from app.endpoints.todo import authentication as auth
+from app.endpoints.namespaces import authentication as auth
 
 
-auth_model = auth.model('Authentication', {
-    'email': fields.String(description='User email', example='thomas@gmail.com'),
-    'password': fields.String(description='User password', example='Shelby2013')
+AUTH_MODEL = auth.model('Authentication', {
+    'email': fields.String(description='User email', example='john@gmail.com'),
+    'password': fields.String(description='User password', example='Johny5863')
 })
 
 
-@auth.doc(model=auth_model, body=auth_model)
+@auth.doc(model=AUTH_MODEL, body=AUTH_MODEL)
 @auth.route('/login', methods=['POST'])
 class Login(Resource):
+    """Class for authentication"""
     def post(self):
         """Login method"""
-        email = request.json.get('email')
-        password = request.json.get('password')
+        try:
+            email = request.json.get('email')
+            password = request.json.get('password')
 
-        user = User.query.filter_by(email=email).first()
+            if request.json == {}:
+                raise AttributeError
 
-        if not user:
-            return 'NO SUCH USER!'
+            user = User.query.filter_by(email=email).first()
 
-        if not check_password_hash(user.password, password):
-            flash('Please check your password and try again.')
-            return 'WRONG PASSWORD!'
+            if not user:
+                auth.logger.warning('User with email %s does not exist.', email)
+                return 'NO SUCH USER!'
 
-        login_user(user)
-        return 'OK'
+            if not check_password_hash(user.password, password):
+                flash('Please check your password and try again.')
+                auth.logger.warning('Wrong password entered.')
+                return 'WRONG PASSWORD!'
+
+            login_user(user)
+            auth.logger.info('%s successfully login.', current_user.name)
+            return 'OK'
+
+        except AttributeError:
+            auth.logger.error(f'Not all authentication information received.')
+            return "Please enter your email and password."
 
 
 @login_required
 @auth.route('/logout', methods=['GET'])
 class Logout(Resource):
+    """Class with method rof user logout"""
     def get(self):
         """Logout method"""
-        logout_user()
-        return 'SUCCESSFULLY LOGOUT'
+        try:
+            user = current_user.name
+            logout_user()
+            auth.logger.info('%s successfully logout.', user)
+            return 'SUCCESSFULLY LOGOUT'
+
+        except AttributeError:
+            auth.logger.error(f'No authorized users found. Logout impossible.')
+            return "No authorized users found!"
