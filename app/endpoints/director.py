@@ -32,8 +32,7 @@ class Director(Resource):
 
     @director.response(400, 'Validation Error')
     @director.response(404, 'Not Found')
-    @director.doc(model=DIRECTOR_MODEL, body=DIRECTOR_MODEL)
-    @director.doc(params={'director_id': 'An ID'})
+    @director.doc(params={'director_id': 'An ID'}, model=DIRECTOR_MODEL, body=DIRECTOR_MODEL)
     def put(self, director_id):
         """Update a record in the director table"""
         return TODO.update(record_id=director_id, crud=DIRECTOR, t_name='director')

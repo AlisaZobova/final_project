@@ -30,6 +30,8 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     """Update schema"""
+    role_id: int
+    password: constr(max_length=255)
 
 
 class UserInDBBase(UserBase):

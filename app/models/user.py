@@ -1,5 +1,7 @@
 """Module with USER orm model"""
 from flask_login import UserMixin
+from werkzeug.security import generate_password_hash
+
 from .db_init import DATABASE
 
 
@@ -12,6 +14,12 @@ class User(UserMixin, DATABASE.Model):
     email = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False, unique=True)
     password = DATABASE.Column(DATABASE.VARCHAR(255), nullable=False)
     films = DATABASE.relationship('Film', backref='user', cascade='all, delete')
+
+    def __init__(self, role_id, name, email, password):
+        self.role_id = role_id
+        self.name = name
+        self.email = email
+        self.password = generate_password_hash(password, method='sha256')
 
     def get_id(self):
         """Override UserMixin method"""

@@ -15,7 +15,7 @@ from app.models import Film, Role
 from loggers import logger
 from .namespaces import film
 
-FILM_MODEL = film.model('Film', {
+FILM_MODEL = film.model('Film Create', {
     'title': fields.String(description='Film title', example='Peaky Blinders'),
     'poster': fields.String(description='Link to the poster',
                             example='https://www.posters.net/Peaky-Blinders-poster'),
@@ -24,7 +24,7 @@ FILM_MODEL = film.model('Film', {
         example='A gangster family epic set in 1900s England, centering on a gang who '
                 'sew razor blades in the peaks of their caps, and their fierce boss Tommy Shelby.'
     ),
-    'release_date': fields.Date(description='Film release date', example='12-09-2013'),
+    'release_date': fields.Date(description='Film release date', example='2013-09-12'),
     'rating': fields.Float(description='Film rating', example='9.5'),
     'genres': fields.String(description='Film genres', example='1&2&4'),
     'directors': fields.String(description='Film directors', example='5&45')
@@ -39,8 +39,40 @@ FILM_UPDATE_MODEL = film.model('Film Update', {
         example='A gangster family epic set in 1900s England, centering on a gang who '
                 'sew razor blades in the peaks of their caps, and their fierce boss Tommy Shelby.'
     ),
-    'release_date': fields.Date(description='Film release date', example='12-09-2013'),
+    'release_date': fields.Date(description='Film release date', example='2013-09-12'),
     'rating': fields.Float(description='Film rating', example='9.5')
+})
+
+MODEL = film.model('Film', {
+    'title': fields.String(example='Peaky Blinders'),
+    'poster': fields.String(example='https://www.posters.net/Peaky-Blinders-poster'),
+    'description': fields.String(
+        example='A gangster family epic set in 1900s England, centering on a gang who '
+                'sew razor blades in the peaks of their caps, and their fierce boss Tommy Shelby.'
+    ),
+    'release_date': fields.Date(example='2013-09-12'),
+    'rating': fields.Float(example='9.5'),
+    'genres': fields.String(example=[
+    {
+      "genre_name": "Action"
+    },
+    {
+      "genre_name": "Comedy"
+    },
+    {
+      "genre_name": "Fantasy"
+    }
+  ]),
+    'directors': fields.String(example=[
+    {
+      "name": "Deanna",
+      "surname": "Craig"
+    },
+    {
+      "name": "Michaela",
+      "surname": "Ruiz"
+    }
+  ])
 })
 
 
@@ -56,10 +88,10 @@ class FilmBase(Resource):
         film_rec = TODO.get(record_id=film_id, crud=FILM, t_name='film')
         return set_unknown_director(film_rec)
 
-    @film.doc(body=FILM_MODEL)
-    @film.response(201, 'Created', FILM_MODEL)
+    @film.response(201, 'Created', model=MODEL)
     @film.response(401, 'Unauthorized')
     @film.response(400, 'Validation Error')
+    @film.doc(body=FILM_MODEL)
     def post(self):
         """Create new record in the film table"""
         if not current_user.is_authenticated:
@@ -106,7 +138,7 @@ class FilmBase(Resource):
                             "can make changes to a film. Access denied.")
         return True
 
-    @film.doc(model=FILM_MODEL, body=FILM_UPDATE_MODEL)
+    @film.doc(model=MODEL, body=FILM_UPDATE_MODEL)
     @film.doc(params={'film_id': 'An ID'})
     @film.response(401, 'Unauthorized')
     @film.response(403, 'Forbidden')
