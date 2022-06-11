@@ -34,10 +34,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
         """Method to create one record"""
         obj_in_data = jsonable_encoder(obj_in)
         database_obj = self.model(**obj_in_data)
+        record = self.schema.from_orm(database_obj)
         database.add(database_obj)
         database.commit()
         database.refresh(database_obj)
-        return self.schema.from_orm(database_obj)
+        return record
 
     def update(self, database: DATABASE.session, *, database_obj: ModelType,
                obj_in: Union[UpdateSchemaType, Dict[str, Any]]) -> BaseSchemaType:
@@ -50,10 +51,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
         for field in obj_data:
             if field in update_data:
                 setattr(database_obj, field, update_data[field])
+        record = self.schema.from_orm(database_obj)
         database.add(database_obj)
         database.commit()
         database.refresh(database_obj)
-        return self.schema.from_orm(database_obj)
+        return record
 
     def remove(self, database: DATABASE.session, *, record_id: int) -> BaseSchemaType:
         """Method to delete one record by id"""

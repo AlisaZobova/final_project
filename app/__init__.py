@@ -1,6 +1,5 @@
 """App module __init__"""
 
-import logging
 from flask import Flask
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -26,8 +25,6 @@ def create_app():
     app.register_blueprint(cmd, cli_group=None)
     app.register_blueprint(api_bp, url_prefix='/api')
     MIGRATE.init_app(app, DATABASE)
-
-    logging.basicConfig(filename='error.log', level=logging.WARNING)
 
     login_manager = LoginManager()
     login_manager.login_view = 'api.authentication_login'

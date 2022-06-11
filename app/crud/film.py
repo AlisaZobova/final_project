@@ -15,8 +15,7 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
     """A class that inherits the base self class and implements
     own methods to perform self operations for the FILM model"""
 
-    def create(self, database: DATABASE.session, obj_in:
-               Union[FilmCreate, Dict[str, Any]], **kwargs) -> FilmBase:
+    def create(self, database: DATABASE.session, obj_in: Dict[str, Any], **kwargs) -> FilmBase:
         """Method to create one record"""
         directors = kwargs['directors']
         genres = kwargs['genres']
@@ -26,10 +25,11 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
             database_obj.genres.append(genre)
         for director in directors:
             database_obj.directors.append(director)
+        film = self.schema.from_orm(database_obj)
         database.add(database_obj)
         database.commit()
         database.refresh(database_obj)
-        return self.schema.from_orm(database_obj)
+        return film
 
     def multy_query(self, database: DATABASE.session):
         """Method for creating multy queries"""
