@@ -1,59 +1,77 @@
 """Module with class with basic methods for future endpoints"""
 
-from flask import Blueprint, request, jsonify
-from flask_restx import Api
+from flask import request, jsonify
+from pydantic.error_wrappers import ValidationError
+from sqlalchemy.exc import DataError, IntegrityError
+from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from app.crud.abstract import CRUDAbstract
 from app.domain import read, create, update, delete, read_multy
-
-api_bp = Blueprint('api', __name__)  # pylint: disable=C0103
-
-api = Api(api_bp)  # pylint: disable=C0103
-
-director = api.namespace('director', description='Director namespace')
-api.add_namespace(director)
-
-film = api.namespace('film', description='Film namespace')
-api.add_namespace(film)
-
-genre = api.namespace('genre', description='Genre namespace')
-api.add_namespace(genre)
-
-user = api.namespace('user', description='User namespace')
-api.add_namespace(user)
-
-authentication = api.namespace('authentication', description='Authentication namespace')
-api.add_namespace(authentication, path='/auth')
+from .namespaces import api
 
 
 class TodoBase:
     """Class with basic methods for future endpoints"""
-    def get(self, record_id: int, crud: CRUDAbstract):
+    def get(self, record_id: int, crud: CRUDAbstract, ns: api.namespace, t_name: str):
         """Method for future get request"""
-        record = read(crud, record_id).dict()
-        if record is not None:
+        try:
+            record = read(crud, record_id).dict()
+            ns.logger.info('Returned %s with ID %d.', t_name, record_id)
             return record
-        api.abort(404, "Record doesn't exist")
+        except ValidationError:
+            ns.logger.error("Attempt to get record with id %d, that doesn't exist.", record_id)
+            api.abort(404, message=f"Record with id {record_id} doesn't exist.")
 
-    def create(self, crud: CRUDAbstract):
+    def create(self, crud: CRUDAbstract, ns: api.namespace, t_name: str):
         """Method for future post request"""
-        data = request.json
-        return create(crud, data).dict()
+        try:
+            data = request.json
+            ns.logger.info('Created new %s with such fields:\n%s.', t_name, str(data))
+            return create(crud, data).dict()
+        except (ValidationError, DataError):
+            ns.logger.error("Incorrect data entered. "
+                            "The record in %s table could not be created.", t_name)
+            return "Incorrect data entered. The record could not be created."
+        except IntegrityError as error:
+            ns.logger.error("Not all required fields have been completed. "
+                            "Can't create a record in % table. %s", t_name, error)
+            return "Not all required fields have been completed. Can't create a record."
 
-    def update(self, record_id: int, crud: CRUDAbstract):
+    def update(self, record_id: int, crud: CRUDAbstract, ns: api.namespace, t_name: str):
         """Method for future put request"""
-        data = request.json
-        return update(crud, record_id, data).dict()
+        try:
+            data = request.json
+            ns.logger.info('Updated %s with id %d. New fields:\n%s.', t_name, record_id, str(data))
+            return update(crud, record_id, data).dict()
+        except (ValidationError, DataError):
+            ns.logger.error("Incorrect data entered. "
+                            "The record in %s table could not be updated.", t_name)
+            return "Incorrect data entered. The record could not be updated."
+        except TypeError:
+            ns.logger.error('Attempt to update record with id % in %s table, '
+                            'but record does not exist.', record_id, t_name)
+            api.abort(404, message=f"Record with id {record_id} doesn't exist.")
 
-    def delete(self, crud: CRUDAbstract, record_id: int):
+    def delete(self, crud: CRUDAbstract, record_id: int, ns: api.namespace, t_name: str):
         """Method for future delete request"""
-        return delete(crud, record_id).dict()
+        try:
+            ns.logger.info(f'Deleted %s with ID %d.', t_name, record_id)
+            return delete(crud, record_id).dict()
+        except UnmappedInstanceError:
+            ns.logger.error("Attempt to delete record with id %d, that doesn't exist.", record_id)
+            api.abort(404, message=f"Record with id {record_id} doesn't exist.")
 
-    def read_all(self, crud: CRUDAbstract, page: int, per_page: int):
+    def read_all(
+            self, crud: CRUDAbstract, page: int, per_page: int,
+            namespace: api.namespace, t_name: str
+    ):
         """Method for future get multy request"""
         if bool(request.args.get('per_page')):
             per_page = int(request.args.get('per_page'))
         records = read_multy(crud, page=page, per_page=per_page).dict()
+        namespace.logger.info('Returned the %d page of %s table records '
+                              'paginated with %d records per page.',
+                              page, t_name, per_page)
         return jsonify(records['__root__'])
 
 

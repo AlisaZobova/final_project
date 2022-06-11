@@ -42,3 +42,6 @@ del_cache:
 
 freeze:
 	pip freeze > requirements.txt
+
+logs_file:
+	sudo docker exec -i -t flask cat error.log
