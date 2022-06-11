@@ -19,25 +19,32 @@ USER_MODEL = user.model(
 @user.route('', methods=['POST'], endpoint='user_create')
 class User(Resource):
     """Class for implementing user HTTP requests"""
+    @user.response(404, 'Not Found')
     @user.doc(params={'user_id': 'An ID'})
     def get(self, user_id):
         """Get one record from the user table"""
-        return TODO.get(record_id=user_id, crud=USER, ns=user, t_name='user')
+        return TODO.get(record_id=user_id, crud=USER, t_name='user')
 
-    @user.doc(model=USER_MODEL, body=USER_MODEL)
+    @user.response(201, 'Created', USER_MODEL)
+    @user.response(400, 'Validation Error')
+    @user.doc(body=USER_MODEL)
     def post(self):
         """Create new record in the user table"""
-        return TODO.create(crud=USER, ns=user, t_name='user')
+        return TODO.create(crud=USER, t_name='user')
 
+    @user.response(400, 'Validation Error')
+    @user.response(404, 'Not Found')
     @user.doc(params={'user_id': 'An ID'})
     def put(self, user_id):
         """Update a record in the user table"""
-        return TODO.update(record_id=user_id, crud=USER, ns=user, t_name='user')
+        return TODO.update(record_id=user_id, crud=USER, t_name='user')
 
+    @user.response(204, 'Record deleted successfully')
+    @user.response(404, 'Not Found')
     @user.doc(params={'user_id': 'An ID'})
     def delete(self, user_id):
         """Delete a record from the user table"""
-        return TODO.delete(record_id=user_id, crud=USER, ns=user, t_name='user')
+        return TODO.delete(record_id=user_id, crud=USER, t_name='user')
 
 
 @user.route('/all/<int:page>', methods=['GET'],
@@ -46,6 +53,7 @@ class User(Resource):
 @user.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Users(Resource):
     """Class for implementing users get multy request"""
+    @user.response(404, 'Not Found')
     def get(self, page, per_page):
         """Get all records from the user table"""
-        return TODO.read_all(crud=USER, page=page, per_page=per_page, namespace=user, t_name='user')
+        return TODO.read_all(crud=USER, page=page, per_page=per_page, t_name='user')

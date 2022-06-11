@@ -19,6 +19,7 @@ AUTH_MODEL = auth.model('Authentication', {
 @auth.route('/login', methods=['POST'])
 class Login(Resource):
     """Class for authentication"""
+    @auth.response(400, 'Validation Error')
     def post(self):
         """Login method"""
         try:
@@ -32,34 +33,36 @@ class Login(Resource):
 
             if not user:
                 auth.logger.warning('User with email %s does not exist.', email)
-                return 'NO SUCH USER!'
+                auth.abort(400, 'NO SUCH USER!')
 
             if not check_password_hash(user.password, password):
                 flash('Please check your password and try again.')
                 auth.logger.warning('Wrong password entered.')
-                return 'WRONG PASSWORD!'
+                auth.abort(400, 'WRONG PASSWORD!')
 
             login_user(user)
             auth.logger.info('%s successfully login.', current_user.name)
-            return 'OK'
+            return 'OK', 200
 
         except AttributeError:
             auth.logger.error(f'Not all authentication information received.')
-            return "Please enter your email and password."
+            auth.abort(400, "Please enter your email and password.")
 
 
 @login_required
 @auth.route('/logout', methods=['GET'])
 class Logout(Resource):
     """Class with method rof user logout"""
+    @auth.response(200, 'Success')
+    @auth.response(401, 'Unauthorized')
     def get(self):
         """Logout method"""
         try:
             user = current_user.name
             logout_user()
             auth.logger.info('%s successfully logout.', user)
-            return 'SUCCESSFULLY LOGOUT'
+            return 'SUCCESSFULLY LOGOUT', 200
 
         except AttributeError:
             auth.logger.error(f'No authorized users found. Logout impossible.')
-            return "No authorized users found!"
+            auth.abort(401, "No authorized users found!")

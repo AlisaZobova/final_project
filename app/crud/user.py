@@ -19,10 +19,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         obj_in_data = jsonable_encoder(obj_in)
         obj_in_data['password'] = generate_password_hash(obj_in_data['password'], method='sha256')
         database_obj = self.model(**obj_in_data)
+        user = self.schema.from_orm(database_obj)
         database.add(database_obj)
         database.commit()
         database.refresh(database_obj)
-        return self.schema.from_orm(database_obj)
+        return user
 
 
 USER = CRUDUser(User, UserBase, UserList)

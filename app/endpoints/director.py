@@ -18,25 +18,32 @@ DIRECTOR_MODEL = director.model('Director', {
 class Director(Resource):
     """Class for implementing director HTTP requests"""
     @director.doc(params={'director_id': 'An ID'})
+    @director.response(404, 'Not Found')
     def get(self, director_id):
         """Get one record from the director table"""
-        return TODO.get(record_id=director_id, crud=DIRECTOR, ns=director, t_name='director')
+        return TODO.get(record_id=director_id, crud=DIRECTOR, t_name='director')
 
-    @director.doc(model=DIRECTOR_MODEL, body=DIRECTOR_MODEL)
+    @director.response(201, 'Created', DIRECTOR_MODEL)
+    @director.response(400, 'Validation Error')
+    @director.doc(body=DIRECTOR_MODEL)
     def post(self):
         """Create new record in the director table"""
-        return TODO.create(crud=DIRECTOR, ns=director, t_name='director')
+        return TODO.create(crud=DIRECTOR, t_name='director')
 
+    @director.response(400, 'Validation Error')
+    @director.response(404, 'Not Found')
     @director.doc(model=DIRECTOR_MODEL, body=DIRECTOR_MODEL)
     @director.doc(params={'director_id': 'An ID'})
     def put(self, director_id):
         """Update a record in the director table"""
-        return TODO.update(record_id=director_id, crud=DIRECTOR, ns=director, t_name='director')
+        return TODO.update(record_id=director_id, crud=DIRECTOR, t_name='director')
 
+    @director.response(204, 'Record deleted successfully')
+    @director.response(404, 'Not Found')
     @director.doc(params={'director_id': 'An ID'})
     def delete(self, director_id):
         """Delete a record from the director table"""
-        return TODO.delete(record_id=director_id, crud=DIRECTOR, ns=director, t_name='director')
+        return TODO.delete(record_id=director_id, crud=DIRECTOR, t_name='director')
 
 
 @director.route('/all/<int:page>', defaults={'per_page': 10},
@@ -45,6 +52,7 @@ class Director(Resource):
 @director.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Directors(Resource):
     """Class for implementing directors get multy request"""
+    @director.response(404, 'Not Found')
     def get(self, page, per_page):
         """Get all records from the director table"""
-        return TODO.read_all(crud=DIRECTOR, page=page, per_page=per_page, namespace=director, t_name='director')
+        return TODO.read_all(crud=DIRECTOR, page=page, per_page=per_page, t_name='director')
