@@ -1,6 +1,7 @@
 """Endpoints for user"""
 
 from flask_restx import Resource, fields
+from sqlalchemy.exc import IntegrityError
 
 from app.crud import USER
 from app.endpoints.todo import TODO
@@ -8,11 +9,15 @@ from .namespaces import user
 
 
 USER_MODEL = user.model(
-    'User', {'role_id': fields.Integer(description='User role id', example=1),
+    'User Create', {'role_id': fields.Integer(description='User role id', example=1),
              'name': fields.String(description='User name', example='John'),
              'email': fields.String(description='User email', example='john@gmail.com'),
              'password': fields.String(description='User password', example='Johny5863')
              })
+
+MODEL = user.model(
+    'User', {'name': fields.String(description='User name', example='John'),
+             'email': fields.String(description='User email', example='john@gmail.com')})
 
 
 @user.route('/<int:user_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='user')
@@ -25,19 +30,25 @@ class User(Resource):
         """Get one record from the user table"""
         return TODO.get(record_id=user_id, crud=USER, t_name='user')
 
-    @user.response(201, 'Created', USER_MODEL)
+    @user.response(201, 'Created', MODEL)
     @user.response(400, 'Validation Error')
     @user.doc(body=USER_MODEL)
     def post(self):
         """Create new record in the user table"""
-        return TODO.create(crud=USER, t_name='user')
+        try:
+            return TODO.create(crud=USER, t_name='user')
+        except IntegrityError:
+            user.abort(400, "User with such email already exist.")
 
     @user.response(400, 'Validation Error')
     @user.response(404, 'Not Found')
-    @user.doc(params={'user_id': 'An ID'})
+    @user.doc(params={'user_id': 'An ID'}, body=USER_MODEL, model=MODEL)
     def put(self, user_id):
         """Update a record in the user table"""
-        return TODO.update(record_id=user_id, crud=USER, t_name='user')
+        try:
+            return TODO.update(record_id=user_id, crud=USER, t_name='user')
+        except IntegrityError:
+            user.abort(400, "User with such email already exist.")
 
     @user.response(204, 'Record deleted successfully')
     @user.response(404, 'Not Found')

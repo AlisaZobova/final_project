@@ -45,3 +45,6 @@ freeze:
 
 logs_file:
 	sudo docker exec -i -t flask cat error.log
+
+test_models:
+	sudo docker exec -it flask pytest tests/unit/models

@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 
 from app.endpoints.namespaces import api_bp
-from config import Config
+from app.config import Config
 from app import models, endpoints
 from app.models.db_init import DATABASE
 from app.commands import cmd
