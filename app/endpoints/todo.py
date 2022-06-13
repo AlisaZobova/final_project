@@ -1,5 +1,5 @@
 """Module with class with basic methods for future endpoints"""
-
+import flask
 from flask import request, jsonify
 from pydantic.error_wrappers import ValidationError
 from sqlalchemy.exc import DataError
@@ -56,8 +56,8 @@ class TodoBase:
         """Method for future delete request"""
         try:
             record = delete(crud, record_id).dict()
-            logger.info(f'Deleted %s with ID %d.', t_name, record_id)
-            return record, 204
+            logger.info(f'Deleted %s with ID %d. %s', t_name, record_id, str(record))
+            return flask.Response(status=204)
         except UnmappedInstanceError:
             logger.error("Attempt to delete record from %s table with id %d, "
                          "that doesn't exist.", t_name, record_id)
@@ -67,8 +67,6 @@ class TodoBase:
             self, crud: CRUDAbstract, page: int, per_page: int, t_name: str
     ):
         """Method for future get multy request"""
-        if bool(request.args.get('per_page')):
-            per_page = int(request.args.get('per_page'))
         try:
             records = read_multy(crud, page=page, per_page=per_page).dict()
 
@@ -78,7 +76,7 @@ class TodoBase:
             return jsonify(records['__root__'])
         except NotFound:
             api.abort(404, message=f"No more records in {t_name} table.")
-            logger.warning(f"No more records in {t_name} table.")
+            logger.warning("No more records in %s table.", t_name)
 
 
 TODO = TodoBase()

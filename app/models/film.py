@@ -11,7 +11,7 @@ class Film(DATABASE.Model):
     film_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
     user_id = DATABASE.Column(DATABASE.Integer, DATABASE.ForeignKey(
         'user.user_id', ondelete='CASCADE'), nullable=False)
-    title = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
+    title = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False, unique=True)
     poster = DATABASE.Column(DATABASE.VARCHAR(100), nullable=False)
     description = DATABASE.Column(DATABASE.Text)
     release_date = DATABASE.Column(DATABASE.Date, nullable=False)

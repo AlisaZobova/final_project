@@ -18,10 +18,11 @@ class CRUDAbstract(ABC):
     """
 
     def __init__(self, model: Type[ModelType], schema: Type[BaseSchemaType],
-                 list_schema: Type[ListSchemaType]):
+                 update_schema: Type[UpdateSchemaType], list_schema: Type[ListSchemaType]):
         self.model = model
         self.schema = schema
         self.list_schema = list_schema
+        self.update_schema = update_schema
 
     @abstractmethod
     def get(self, database: DATABASE.session, record_id: Any) -> Optional[BaseSchemaType]:

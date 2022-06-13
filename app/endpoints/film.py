@@ -15,7 +15,7 @@ from app.models import Film, Role
 from loggers import logger
 from .namespaces import film
 
-FILM_MODEL = film.model('Film Create', {
+FILM_CREATE_MODEL = film.model('Film Create', {
     'title': fields.String(description='Film title', example='Peaky Blinders'),
     'poster': fields.String(description='Link to the poster',
                             example='https://www.posters.net/Peaky-Blinders-poster'),
@@ -43,7 +43,7 @@ FILM_UPDATE_MODEL = film.model('Film Update', {
     'rating': fields.Float(description='Film rating', example='9.5')
 })
 
-MODEL = film.model('Film', {
+FILM_MODEL = film.model('Film', {
     'title': fields.String(example='Peaky Blinders'),
     'poster': fields.String(example='https://www.posters.net/Peaky-Blinders-poster'),
     'description': fields.String(
@@ -53,26 +53,26 @@ MODEL = film.model('Film', {
     'release_date': fields.Date(example='2013-09-12'),
     'rating': fields.Float(example='9.5'),
     'genres': fields.String(example=[
-    {
-      "genre_name": "Action"
-    },
-    {
-      "genre_name": "Comedy"
-    },
-    {
-      "genre_name": "Fantasy"
-    }
-  ]),
+        {
+            "genre_name": "Action"
+        },
+        {
+            "genre_name": "Comedy"
+        },
+        {
+            "genre_name": "Fantasy"
+        }
+    ]),
     'directors': fields.String(example=[
-    {
-      "name": "Deanna",
-      "surname": "Craig"
-    },
-    {
-      "name": "Michaela",
-      "surname": "Ruiz"
-    }
-  ])
+        {
+            "name": "Deanna",
+            "surname": "Craig"
+        },
+        {
+            "name": "Michaela",
+            "surname": "Ruiz"
+        }
+    ])
 })
 
 
@@ -88,10 +88,10 @@ class FilmBase(Resource):
         film_rec = TODO.get(record_id=film_id, crud=FILM, t_name='film')
         return set_unknown_director(film_rec)
 
-    @film.response(201, 'Created', model=MODEL)
+    @film.response(201, 'Created', model=FILM_MODEL)
     @film.response(401, 'Unauthorized')
     @film.response(400, 'Validation Error')
-    @film.doc(body=FILM_MODEL)
+    @film.doc(body=FILM_CREATE_MODEL)
     def post(self):
         """Create new record in the film table"""
         if not current_user.is_authenticated:
@@ -124,11 +124,15 @@ class FilmBase(Resource):
                               "The record in film table could not be created. %s", error)
             film.abort(400, message="Incorrect data entered. The record could not be created.")
 
+        except ValueError:
+            logger.error("Attempt to create film with title that already exist.")
+            film.abort(400, "Film with such title already exist.")
+
     def del_put_access(self, film_id: int, action: str):
         """Check access to put and post methods"""
         if not current_user.is_authenticated:
             film.logger.error('An attempt to %s a movie by an unauthenticated user.', action)
-            film.abort(401, 'You need to be authenticated to %s a film', action)
+            film.abort(401, f'You need to be authenticated to {action} a film.')
         db_film = Film.query.get(film_id)
         admin = Role.query.filter_by(name='admin').first()
         if db_film.user_id != current_user.user_id and current_user.role_id != admin.role_id:
@@ -138,7 +142,7 @@ class FilmBase(Resource):
                             "can make changes to a film. Access denied.")
         return True
 
-    @film.doc(model=MODEL, body=FILM_UPDATE_MODEL)
+    @film.doc(model=FILM_MODEL, body=FILM_UPDATE_MODEL)
     @film.doc(params={'film_id': 'An ID'})
     @film.response(401, 'Unauthorized')
     @film.response(403, 'Forbidden')
@@ -150,13 +154,18 @@ class FilmBase(Resource):
             if access is True:
                 film_rec = TODO.update(record_id=film_id, crud=FILM, t_name='film')
                 return set_unknown_director(film_rec)
-            return access
+
         except AttributeError:
             film.logger.error('Attempt to update record with id %d in film table, '
                               'but record does not exist.', film_id)
             film.abort(404, message=f"Record with id {film_id} doesn't exist.")
 
+        except ValueError:
+            logger.error("Attempt to update film title to the one that is already in the database.")
+            film.abort(400, "Film with such title already exist.")
+
     @film.doc(params={'film_id': 'An ID'})
+    @film.response(204, 'Record deleted successfully')
     @film.response(401, 'Unauthorized')
     @film.response(403, 'Forbidden')
     @film.response(404, 'Not Found')
@@ -165,9 +174,7 @@ class FilmBase(Resource):
         try:
             access = self.del_put_access(film_id=film_id, action='delete')
             if access is True:
-                film_rec = TODO.delete(record_id=film_id, crud=FILM, t_name='film')
-                return set_unknown_director(film_rec)
-            return access
+                return TODO.delete(record_id=film_id, crud=FILM, t_name='film')
         except (AttributeError, ValidationError):
             film.logger.error('Attempt to delete record with id %d in film table, '
                               'but record does not exist.', film_id)
@@ -175,7 +182,7 @@ class FilmBase(Resource):
 
 
 @film.route('/all/<int:page>', methods=['GET'], defaults={'per_page': 10}, endpoint='films_default')
-@film.route('/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='films_per_page')
+@film.route('/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='films')
 @film.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Films(Resource):
     """Class for implementing films get multy request"""
@@ -183,8 +190,6 @@ class Films(Resource):
     @film.response(404, 'Not Found')
     def get(self, page, per_page):
         """Get all records from the film table"""
-        if bool(request.args.get('per_page')):
-            per_page = int(request.args.get('per_page'))
         try:
             films = read_films(crud=FILM, page=page, per_page=per_page).dict()
             film.logger.info('Returned the %d page of film table '
@@ -198,7 +203,7 @@ class Films(Resource):
 @film.route('/<string:title>/<int:page>', methods=['GET'],
             defaults={'per_page': 10}, endpoint='films_title_default')
 @film.route('/<string:title>/<int:page>/<int:per_page>', methods=['GET'],
-            endpoint='films_title_per_page')
+            endpoint='films_title')
 @film.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page',
                   'title': "Part of the film's title"})
 class FilmsTitle(Resource):
@@ -207,8 +212,6 @@ class FilmsTitle(Resource):
     @film.response(404, 'Not Found')
     def get(self, page, per_page, title):
         """Get all records from the film table by partial coincidence of title"""
-        if bool(request.args.get('per_page')):
-            per_page = int(request.args.get('per_page'))
         try:
             films = get_multi_by_title(film_crud=FILM, page=page,
                                        per_page=per_page, title=title).dict()
@@ -238,8 +241,6 @@ class FilmsFiltered(Resource):
     @film.response(404, 'Not Found')
     def get(self, page, per_page):
         """Get all records from the film table filtered by genres, release_date and directors"""
-        if bool(request.args.get('per_page')):
-            per_page = int(request.args.get('per_page'))
         data = [request.args.get('release_date', default=None),
                 request.args.get('directors', default=None),
                 request.args.get('genres', default=None)]
@@ -269,8 +270,6 @@ class FilmsSorted(Resource):
     @film.response(404, 'Not Found')
     def get(self, page: int, per_page: int):
         """Get all records from the film table sorted by release_date and rating"""
-        if bool(request.args.get('per_page')):
-            per_page = int(request.args.get('per_page'))
         order = [request.args.get('release_date', default=None),
                  request.args.get('rating', default=None)]
         try:

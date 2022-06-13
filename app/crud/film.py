@@ -1,8 +1,8 @@
 """Module with FILM CRUD realisation"""
 
-from typing import List, Union, Dict, Any
+from typing import List, Dict, Any
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import extract, or_
+from sqlalchemy import extract
 
 from app.models import Genre, Director, Film
 from app.schemas.film import FilmCreate, FilmUpdate, FilmBase, FilmList
@@ -17,10 +17,15 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
 
     def create(self, database: DATABASE.session, obj_in: Dict[str, Any], **kwargs) -> FilmBase:
         """Method to create one record"""
+        obj_in_data = jsonable_encoder(obj_in)
+        self.check_db_error(database, obj_in_data)
+        data = obj_in_data
+        data['directors'] = []
+        data['genres'] = []
+        self.schema.parse_obj(data)
+        database_obj = self.model(**obj_in_data)
         directors = kwargs['directors']
         genres = kwargs['genres']
-        obj_in_data = jsonable_encoder(obj_in)
-        database_obj = self.model(**obj_in_data)
         for genre in genres:
             database_obj.genres.append(genre)
         for director in directors:
@@ -31,6 +36,12 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
         database.refresh(database_obj)
         return film
 
+    def check_db_error(self, database, data):
+        """Method for checking database errors"""
+        if 'title' in data.keys():
+            if len(database.query(self.model).filter(self.model.title == data['title']).all()) != 0:
+                raise ValueError
+
     def multy_query(self, database: DATABASE.session):
         """Method for creating multy queries"""
         return database.query(self.model)
@@ -38,18 +49,6 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
     def query_paginate(self, query, page: int = 1, per_page: int = 10):
         """Method for pagination multy queries"""
         return query.paginate(page=page, per_page=per_page).items
-
-    def get_multi(
-            self, database: DATABASE.session, *,
-            page=1, per_page: int = 10
-    ) -> List[FilmBase]:
-        """Method to read all records from a table with default pagination set to 10"""
-        return self.list_schema.from_orm(
-            [self.schema.from_orm(item) for item in
-             self.query_paginate(
-                 self.multy_query(database)
-                 .order_by(self.model.film_id.asc()),
-                 page=page, per_page=per_page)])
 
     def get_multi_by_title(
             self, database: DATABASE.session, title: str, page=1, per_page: int = 10
@@ -138,4 +137,4 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
              self.query_paginate(query, page=page, per_page=per_page)])
 
 
-FILM = CRUDFilm(Film, FilmBase, FilmList)
+FILM = CRUDFilm(Film, FilmBase, FilmUpdate, FilmList)

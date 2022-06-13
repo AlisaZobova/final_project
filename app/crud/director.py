@@ -1,9 +1,9 @@
 """Module with DIRECTOR CRUD realisation"""
 
 from app.models import Director, Film
-from .base import CRUDBase
 from app.schemas.director import DirectorCreate, DirectorUpdate, DirectorBase, DirectorList
 from app.models.db_init import DATABASE
+from .base import CRUDBase
 
 
 class CRUDDirector(CRUDBase[Director, DirectorCreate, DirectorUpdate]):
@@ -21,4 +21,4 @@ class CRUDDirector(CRUDBase[Director, DirectorCreate, DirectorUpdate]):
         return self.schema.from_orm(obj)
 
 
-DIRECTOR = CRUDDirector(Director, DirectorBase, DirectorList)
+DIRECTOR = CRUDDirector(Director, DirectorBase, DirectorUpdate, DirectorList)

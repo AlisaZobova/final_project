@@ -6,7 +6,7 @@ from .crud import DIRECTOR, FILM, GENRE, USER
 from .models import Director, Genre, Role
 from .models.db_init import DATABASE
 
-cmd = Blueprint('cmd', __name__, cli_group=None)
+cmd = Blueprint('cmd', __name__, cli_group=None)  # pylint: disable=C0103
 FAKER = Faker()
 
 

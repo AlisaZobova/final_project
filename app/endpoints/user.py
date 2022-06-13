@@ -1,21 +1,20 @@
 """Endpoints for user"""
 
 from flask_restx import Resource, fields
-from sqlalchemy.exc import IntegrityError
 
 from app.crud import USER
 from app.endpoints.todo import TODO
+from loggers import logger
 from .namespaces import user
 
+USER_CREATE_MODEL = user.model(
+    'User Create', {'role_id': fields.Integer(description='User role id', example=2),
+                    'name': fields.String(description='User name', example='John'),
+                    'email': fields.String(description='User email', example='john@gmail.com'),
+                    'password': fields.String(description='User password', example='Johny5863')
+                    })
 
 USER_MODEL = user.model(
-    'User Create', {'role_id': fields.Integer(description='User role id', example=1),
-             'name': fields.String(description='User name', example='John'),
-             'email': fields.String(description='User email', example='john@gmail.com'),
-             'password': fields.String(description='User password', example='Johny5863')
-             })
-
-MODEL = user.model(
     'User', {'name': fields.String(description='User name', example='John'),
              'email': fields.String(description='User email', example='john@gmail.com')})
 
@@ -24,30 +23,33 @@ MODEL = user.model(
 @user.route('', methods=['POST'], endpoint='user_create')
 class User(Resource):
     """Class for implementing user HTTP requests"""
+
     @user.response(404, 'Not Found')
     @user.doc(params={'user_id': 'An ID'})
     def get(self, user_id):
         """Get one record from the user table"""
         return TODO.get(record_id=user_id, crud=USER, t_name='user')
 
-    @user.response(201, 'Created', MODEL)
+    @user.response(201, 'Created', USER_MODEL)
     @user.response(400, 'Validation Error')
-    @user.doc(body=USER_MODEL)
+    @user.doc(body=USER_CREATE_MODEL)
     def post(self):
         """Create new record in the user table"""
         try:
             return TODO.create(crud=USER, t_name='user')
-        except IntegrityError:
+        except ValueError:
+            logger.error("Attempt to create user with email that already exist.")
             user.abort(400, "User with such email already exist.")
 
     @user.response(400, 'Validation Error')
     @user.response(404, 'Not Found')
-    @user.doc(params={'user_id': 'An ID'}, body=USER_MODEL, model=MODEL)
+    @user.doc(params={'user_id': 'An ID'}, body=USER_CREATE_MODEL, model=USER_MODEL)
     def put(self, user_id):
         """Update a record in the user table"""
         try:
             return TODO.update(record_id=user_id, crud=USER, t_name='user')
-        except IntegrityError:
+        except ValueError:
+            logger.error("Attempt to update the email to the one that is already in the database.")
             user.abort(400, "User with such email already exist.")
 
     @user.response(204, 'Record deleted successfully')
@@ -64,6 +66,7 @@ class User(Resource):
 @user.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Users(Resource):
     """Class for implementing users get multy request"""
+
     @user.response(404, 'Not Found')
     def get(self, page, per_page):
         """Get all records from the user table"""

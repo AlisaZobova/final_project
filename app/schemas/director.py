@@ -1,6 +1,6 @@
 """Module with director pydentic schemas"""
 import re
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, constr, validator
 
@@ -35,6 +35,8 @@ class DirectorCreate(DirectorBase):
 
 class DirectorUpdate(DirectorBase):
     """Update schema"""
+    name: Optional[constr(max_length=50)] = None
+    surname: Optional[constr(max_length=50)] = None
 
 
 class DirectorInDBBase(DirectorBase):

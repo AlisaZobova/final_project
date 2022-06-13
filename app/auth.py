@@ -20,6 +20,7 @@ AUTH_MODEL = auth.model('Authentication', {
 class Login(Resource):
     """Class for authentication"""
     @auth.response(400, 'Validation Error')
+    @auth.response(404, 'Not Found')
     def post(self):
         """Login method"""
         try:
@@ -33,7 +34,7 @@ class Login(Resource):
 
             if not user:
                 auth.logger.warning('User with email %s does not exist.', email)
-                auth.abort(400, 'NO SUCH USER!')
+                auth.abort(404, 'NO SUCH USER!')
 
             if not check_password_hash(user.password, password):
                 flash('Please check your password and try again.')

@@ -1,6 +1,6 @@
 """Module with genre pydentic schemas"""
 import re
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, constr, validator
 
@@ -27,6 +27,7 @@ class GenreCreate(GenreBase):
 
 class GenreUpdate(GenreBase):
     """Update schema"""
+    genre_name: Optional[constr(max_length=50)] = None
 
 
 class GenreInDBBase(GenreBase):
