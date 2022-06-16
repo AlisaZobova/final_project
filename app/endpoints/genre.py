@@ -1,10 +1,9 @@
 """Endpoints for genre"""
 
 from flask_restx import Resource, fields
-from sqlalchemy.exc import IntegrityError
-
 from app.crud import GENRE
 from app.endpoints.todo import TODO
+from loggers import logger
 from .namespaces import genre
 
 
@@ -30,7 +29,8 @@ class Genre(Resource):
         """Create new record in the genre table"""
         try:
             return TODO.create(crud=GENRE, t_name='genre')
-        except IntegrityError:
+        except ValueError:
+            logger.error("Attempt to create genre with name that already exist.")
             genre.abort(400, "Genre with such name already exist.")
 
     @genre.response(400, 'Validation Error')
@@ -40,7 +40,9 @@ class Genre(Resource):
         """Update a record in the genre table"""
         try:
             return TODO.update(record_id=genre_id, crud=GENRE, t_name='genre')
-        except IntegrityError:
+        except ValueError:
+            logger.error("Attempt to update the genre name to the one "
+                         "that is already in the database.")
             genre.abort(400, "Genre with such name already exist.")
 
     @genre.response(204, 'Record deleted successfully')

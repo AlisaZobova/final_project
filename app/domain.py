@@ -35,6 +35,7 @@ def delete(crud: CRUDAbstract, record_id: int):
 
 
 def set_unknown_director(film):
+    """Set directors = UNKNOWN if film has no any director"""
     if not bool(film['directors']):
         film['directors'] = 'UNKNOWN'
     film['release_date'] = film['release_date'].isoformat()
@@ -50,7 +51,8 @@ def create_film(
     directors_id = directors_id.split('&')
     directors = [DATABASE.session.query(Director).get(i) for i in directors_id]
     genres = [DATABASE.session.query(Genre).get(i) for i in genres_id]
-    film = crud.create(database=DATABASE.session, obj_in=values, directors=directors, genres=genres).dict()
+    film = crud.create(database=DATABASE.session, obj_in=values,
+                       directors=directors, genres=genres).dict()
     film['release_date'] = film['release_date'].isoformat()
     return film
 

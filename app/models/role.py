@@ -8,4 +8,4 @@ class Role(DATABASE.Model):
     __tablename__ = 'role'
     role_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
     name = DATABASE.Column(DATABASE.VARCHAR(50), unique=True)
-    users = DATABASE.relationship('User', backref=DATABASE.backref('ROLE'))
+    users = DATABASE.relationship('User', backref=DATABASE.backref('role'))

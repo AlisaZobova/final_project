@@ -1,6 +1,6 @@
 """Module with role pydentic schemas"""
 
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, constr
 
@@ -20,6 +20,7 @@ class RoleCreate(RoleBase):
 
 class RoleUpdate(RoleBase):
     """Update schema"""
+    name: Optional[constr(max_length=20)] = None
 
 
 class RoleInDBBase(RoleBase):

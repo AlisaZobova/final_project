@@ -16,6 +16,16 @@ services:
             timeout: 5s
             retries: 5
 
+    test-database:
+        image: postgres:10.4
+        restart: always
+        ports:
+            - "5433:5432"
+        env_file:
+            - .env.test
+        volumes:
+            - test-database-data:/var/lib/postgresql/data
+
     nginx:
         image: nginx
         ports:
@@ -48,3 +58,4 @@ services:
 
 volumes:
     database-data:
+    test-database-data:

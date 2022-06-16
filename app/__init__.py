@@ -16,10 +16,10 @@ from app.models import User
 MIGRATE = Migrate()
 
 
-def create_app():
+def create_app(conf=Config):
     """Function for creating app"""
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(conf)
 
     DATABASE.init_app(app)
     app.register_blueprint(cmd, cli_group=None)

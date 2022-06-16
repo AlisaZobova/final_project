@@ -12,7 +12,6 @@ class FilmBase(BaseModel):
     """Base schema"""
     title: constr(max_length=50)
     poster: HttpUrl
-    description: Optional[str] = None
     release_date: date
     rating: confloat(ge=0, le=10)
     directors: List[DirectorBase]
@@ -44,6 +43,13 @@ class FilmCreate(FilmBase):
 
 class FilmUpdate(FilmBase):
     """Update schema"""
+    title: Optional[constr(max_length=50)] = None
+    poster: Optional[HttpUrl] = None
+    description: Optional[str] = None
+    release_date: Optional[date] = None
+    rating: Optional[confloat(ge=0, le=10)] = None
+    directors: Optional[List[DirectorBase]] = None
+    genres: Optional[List[GenreBase]] = None
 
 
 class FilmInDBBase(FilmBase):

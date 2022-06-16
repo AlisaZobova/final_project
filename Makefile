@@ -46,5 +46,8 @@ freeze:
 logs_file:
 	sudo docker exec -i -t flask cat error.log
 
-test_models:
-	sudo docker exec -it flask pytest tests/unit/models
+run_tests:
+	sudo docker exec -it flask pytest tests
+
+test_db:
+	sudo docker-compose exec test-database psql --username=postgres --dbname=film_library_test

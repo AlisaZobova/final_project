@@ -33,8 +33,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
                **kwargs) -> BaseSchemaType:
         """Method to create one record"""
         obj_in_data = jsonable_encoder(obj_in)
+        self.check_db_error(database, obj_in_data)
+        record = self.schema.parse_obj(obj_in_data)
         database_obj = self.model(**obj_in_data)
-        record = self.schema.from_orm(database_obj)
         database.add(database_obj)
         database.commit()
         database.refresh(database_obj)
@@ -44,6 +45,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
                obj_in: Union[UpdateSchemaType, Dict[str, Any]]) -> BaseSchemaType:
         """Method to update one record"""
         obj_data = jsonable_encoder(database_obj)
+        self.check_db_error(database, obj_in)
+        self.update_schema.parse_obj(obj_in)
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
@@ -63,3 +66,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
         database.delete(obj)
         database.commit()
         return self.schema.from_orm(obj)
+
+    def check_db_error(self, database, data):
+        """Method for checking database errors"""

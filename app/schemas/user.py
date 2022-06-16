@@ -1,6 +1,6 @@
 """Module with user pydentic schemas"""
 import re
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, constr, validator
 
@@ -30,8 +30,10 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     """Update schema"""
-    role_id: int
-    password: constr(max_length=255)
+    role_id: Optional[int] = None
+    password: Optional[constr(max_length=255)] = None
+    name: Optional[constr(max_length=50)] = None
+    email: Optional[EmailStr] = None
 
 
 class UserInDBBase(UserBase):
