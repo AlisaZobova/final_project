@@ -3,23 +3,21 @@
 from flask import Blueprint
 from flask_restx import Api
 
-# pylint: disable=C0103
-
 api_bp = Blueprint('api', __name__)
 
 api = Api(api_bp)
 
-authentication = api.namespace('authentication', description='Authentication namespace')
-api.add_namespace(authentication, path='/auth')
+auth_ns = api.namespace('authentication', description='Authentication namespace')
+api.add_namespace(auth_ns, path='/auth')
 
-director = api.namespace('director', description='Director namespace')
-api.add_namespace(director)
+director_ns = api.namespace('director', description='Director namespace')
+api.add_namespace(director_ns)
 
-film = api.namespace('film', description='Film namespace')
-api.add_namespace(film)
+film_ns = api.namespace('film', description='Film namespace')
+api.add_namespace(film_ns)
 
-genre = api.namespace('genre', description='Genre namespace')
-api.add_namespace(genre)
+genre_ns = api.namespace('genre', description='Genre namespace')
+api.add_namespace(genre_ns)
 
-user = api.namespace('user', description='User namespace')
-api.add_namespace(user)
+user_ns = api.namespace('user', description='User namespace')
+api.add_namespace(user_ns)

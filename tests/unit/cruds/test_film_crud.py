@@ -4,9 +4,9 @@ from pydantic import ValidationError
 import pytest
 
 
-from app import DATABASE
-from app.crud import FILM
-from app.models import Genre, Director, Film
+from app import db
+from app.crud import film
+from app.models import Film
 from app.schemas import FilmBase
 
 
@@ -89,17 +89,14 @@ from app.schemas import FilmBase
 )
 def test_create_film(app_with_data, data, directors, genres, valid):
     """Check record creation with all relationships"""
-    genres_id = genres.split('&')
-    directors_id = directors.split('&')
-    directors = [DATABASE.session.query(Director).get(i) for i in directors_id]
-    genres = [DATABASE.session.query(Genre).get(i) for i in genres_id]
+    genres = genres.split('&')
+    directors = directors.split('&')
     try:
-        film = FILM.create(database=DATABASE.session, obj_in=data,
-                           directors=directors, genres=genres)
+        new_film = film.create(obj_in=data, directors=directors, genres=genres)
         assert valid
-        assert isinstance(film, FilmBase)
-        assert len(film.genres) == 2
-        assert len(film.directors) == 3
+        assert isinstance(new_film, FilmBase)
+        assert len(new_film.genres) == 2
+        assert len(new_film.directors) == 3
     except ValidationError:
         assert not valid
 
@@ -109,7 +106,7 @@ def test_create_film(app_with_data, data, directors, genres, valid):
     [("Mar", 2), ("Evening", 1), ("other", 1)])
 def test_get_multy_by_title(app_with_data, title, count):
     """Checking the search for a partial match of the name"""
-    films = FILM.get_multi_by_title(title=title, database=DATABASE.session).dict()['__root__']
+    films = film.get_multi_by_title(title=title).dict()['__root__']
     assert len(films) == count
     assert all(title.lower() in film['title'].lower() for film in films)
 
@@ -119,8 +116,8 @@ def test_get_multy_by_title(app_with_data, title, count):
     [("2001-2009", 2), ("2015-2019", 3)])
 def test_date_filter(app_with_data, date_range, count):
     """Check filter by date"""
-    query = DATABASE.session.query(Film).distinct()
-    films = FILM.date_filter(query, date_range).all()
+    query = db.session.query(Film).distinct()
+    films = film.date_filter(query, date_range).all()
     assert len(films) == count
 
 
@@ -129,8 +126,8 @@ def test_date_filter(app_with_data, date_range, count):
     [("John_Johnson", 2), ("Jack_Jackson", 3), ("John_Johnson&Jack_Jackson", 4)])
 def test_director_filter(app_with_data, directors, count):
     """Checking the filter by directors"""
-    query = DATABASE.session.query(Film).distinct()
-    films = FILM.director_filter(query, directors).all()
+    query = db.session.query(Film).distinct()
+    films = film.director_filter(query, directors).all()
     assert len(films) == count
 
 
@@ -140,8 +137,8 @@ def test_director_filter(app_with_data, directors, count):
      ('Action&Drama', 4), ('Fantasy&Drama', 3)])
 def test_genre_filter(app_with_data, genres, count):
     """Check filter by genres"""
-    query = DATABASE.session.query(Film).distinct()
-    films = FILM.genre_filter(query, genres).all()
+    query = db.session.query(Film).distinct()
+    films = film.genre_filter(query, genres).all()
     assert len(films) == count
 
 
@@ -152,36 +149,36 @@ def test_genre_filter(app_with_data, genres, count):
      (["2015-2019", "Jack_Jackson", "Drama"], 1)])
 def test_multy_filter(app_with_data, data, count):
     """Checking the multifilter"""
-    films = FILM.query_film_multy_filter(database=DATABASE.session, values=data).dict()['__root__']
+    films = film.query_film_multy_filter(values=data).dict()['__root__']
     assert len(films) == count
 
 
 def test_sort_rating_asc(app_with_data):
     """Checking the sorting of movies by rating in ascending order"""
-    alchemy = FILM.rating_asc(query=DATABASE.session.query(Film)).all()
-    db = DATABASE.session.execute("SELECT * from film ORDER BY rating").all()
-    assert [film.film_id for film in alchemy] == [query[0] for query in db]
+    alchemy = film.rating_asc(query=db.session.query(Film)).all()
+    db_query = db.session.execute("SELECT * from film ORDER BY rating").all()
+    assert [film.film_id for film in alchemy] == [query[0] for query in db_query]
 
 
 def test_sort_rating_desc(app_with_data):
     """Checking the sorting of movies by rating in descending order"""
-    alchemy = FILM.rating_desc(query=DATABASE.session.query(Film)).all()
-    db = DATABASE.session.execute("SELECT * from film ORDER BY rating DESC").all()
-    assert [film.film_id for film in alchemy] == [query[0] for query in db]
+    alchemy = film.rating_desc(query=db.session.query(Film)).all()
+    db_query = db.session.execute("SELECT * from film ORDER BY rating DESC").all()
+    assert [film.film_id for film in alchemy] == [query[0] for query in db_query]
 
 
 def test_sort_date_asc(app_with_data):
     """Checking the sorting of movies by release date in ascending order"""
-    alchemy = FILM.date_asc(query=DATABASE.session.query(Film)).all()
-    db = DATABASE.session.execute("SELECT * from film ORDER BY release_date").all()
-    assert [film.film_id for film in alchemy] == [query[0] for query in db]
+    alchemy = film.date_asc(query=db.session.query(Film)).all()
+    db_query = db.session.execute("SELECT * from film ORDER BY release_date").all()
+    assert [film.film_id for film in alchemy] == [query[0] for query in db_query]
 
 
 def test_sort_date_desc(app_with_data):
     """Checking the sorting of movies by release date in descending order"""
-    alchemy = FILM.date_desc(query=DATABASE.session.query(Film)).all()
-    db = DATABASE.session.execute("SELECT * from film ORDER BY release_date DESC").all()
-    assert [film.film_id for film in alchemy] == [query[0] for query in db]
+    alchemy = film.date_desc(query=db.session.query(Film)).all()
+    db_query = db.session.execute("SELECT * from film ORDER BY release_date DESC").all()
+    assert [film.film_id for film in alchemy] == [query[0] for query in db_query]
 
 
 @pytest.mark.parametrize(
@@ -192,6 +189,6 @@ def test_sort_date_desc(app_with_data):
      (["asc", "asc"], "SELECT * from film ORDER BY release_date, rating")])
 def test_multy_sort(app_with_data, data, postgres_query):
     """Multisort check"""
-    alchemy = FILM.query_film_multy_sort(database=DATABASE.session, order=data).dict()["__root__"]
-    db = DATABASE.session.execute(postgres_query).all()
-    assert [alchemy[i]['title'] == db[i][1] for i in range(len(alchemy))]
+    alchemy = film.query_film_multy_sort(order=data).dict()["__root__"]
+    db_query = db.session.execute(postgres_query).all()
+    assert [alchemy[i]['title'] == db_query[i][1] for i in range(len(alchemy))]

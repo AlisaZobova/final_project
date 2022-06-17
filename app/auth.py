@@ -6,16 +6,16 @@ from flask_restx import Resource, fields
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app.models import User
-from app.endpoints.namespaces import authentication as auth
+from app.endpoints.namespaces import auth_ns as auth
 
 
-AUTH_MODEL = auth.model('Authentication', {
+auth_model = auth.model('Authentication', {
     'email': fields.String(description='User email', example='john@gmail.com'),
     'password': fields.String(description='User password', example='Johny5863')
 })
 
 
-@auth.doc(model=AUTH_MODEL, body=AUTH_MODEL)
+@auth.doc(model=auth_model, body=auth_model)
 @auth.route('/login', methods=['POST'])
 class Login(Resource):
     """Class for authentication"""
@@ -46,7 +46,7 @@ class Login(Resource):
             return 'OK', 200
 
         except AttributeError:
-            auth.logger.error(f'Not all authentication information received.')
+            auth.logger.error('Not all authentication information received.')
             auth.abort(400, "Please enter your email and password.")
 
 
@@ -65,5 +65,5 @@ class Logout(Resource):
             return 'SUCCESSFULLY LOGOUT', 200
 
         except AttributeError:
-            auth.logger.error(f'No authorized users found. Logout impossible.')
+            auth.logger.error('No authorized users found. Logout impossible.')
             auth.abort(401, "No authorized users found!")

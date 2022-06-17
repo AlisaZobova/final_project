@@ -3,9 +3,10 @@
 from flask import url_for
 import pytest
 
-from app import DATABASE
+from app import db
 from app.models import Genre
 from app.schemas import GenreBase
+from .test_subfunctions import check_count
 
 
 @pytest.mark.parametrize(
@@ -37,7 +38,7 @@ def test_create_genre(app_with_data, data, code):
     assert response.status_code == code
 
     if code == 201:
-        count = len(DATABASE.session.query(Genre)
+        count = len(db.session.query(Genre)
                     .filter(Genre.genre_name == data['genre_name']).all())
         assert count == 1
 
@@ -55,7 +56,7 @@ def test_get_genre_by_id(app_with_data, genre_id, code):
 
     if code == 200:
         data = response.json
-        record = GenreBase.from_orm(DATABASE.session.query(Genre).get(genre_id))
+        record = GenreBase.from_orm(db.session.query(Genre).get(genre_id))
         assert data == record
 
 
@@ -81,7 +82,7 @@ def test_update_genre_by_id(app_with_data, genre_id, data, code):
     # then
     assert response.status_code == code
     if code == 200:
-        record = GenreBase.from_orm(DATABASE.session.query(Genre).get(genre_id)).dict()
+        record = GenreBase.from_orm(db.session.query(Genre).get(genre_id)).dict()
         data = response.json
         assert data == record
 
@@ -98,11 +99,7 @@ def test_get_all_genres_default(app_with_data, page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
@@ -120,11 +117,7 @@ def test_get_all_genres(app_with_data, page, per_page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(

@@ -7,32 +7,8 @@ from app.schemas import FilmBase
 
 
 @pytest.mark.parametrize(
-    "data, valid",
+    "data",
     [
-        ({
-            "title": "Peaky Blinders",
-            "poster": "https://www.posters.net/Peaky-Blinders-poster",
-            "description": "A gangster family epic set in 1900s England.",
-            "release_date": "2013-09-12",
-            "rating": 9.5,
-            "user_id": 4,
-            "directors": [],
-            "genres": []
-        },
-         True
-        ),
-        ({
-            "title": "Peaky 2",
-            "poster": "https://www.posters.net/Peaky-Blinders-poster",
-            "description": "A gangster family epic set in 1900s England.",
-            "release_date": "2013-09-12",
-            "rating": 9.5,
-            "user_id": 4,
-            "directors": [],
-            "genres": []
-        },
-         True
-        ),
         ({
             "title": "Peaky Blinders 1",
             "poster": "www.posters.net/Peaky-Blinders-poster",
@@ -42,8 +18,7 @@ from app.schemas import FilmBase
             "user_id": 4,
             "directors": [],
             "genres": []
-        },
-         False
+        }
         ),
         ({
             "title": "peaky Blinders",
@@ -54,8 +29,7 @@ from app.schemas import FilmBase
             "user_id": 4,
             "directors": [],
             "genres": []
-        },
-         False
+        }
         ),
         ({
             "title": "Peaky124",
@@ -66,8 +40,7 @@ from app.schemas import FilmBase
             "user_id": 4,
             "directors": [],
             "genres": []
-        },
-         False
+        }
         ),
         ({
             "title": "Peaky Blinders 2",
@@ -78,15 +51,11 @@ from app.schemas import FilmBase
             "user_id": 4,
             "directors": [],
             "genres": []
-        },
-         False
+        }
         )
     ]
 )
-def test_validate_film(app_with_data, data, valid):
+def test_validate_film(app_with_data, data):
     """Checking for a validation error when entering invalid data"""
-    try:
+    with pytest.raises(ValidationError):
         FilmBase.parse_obj(data)
-        assert valid
-    except ValidationError:
-        assert not valid

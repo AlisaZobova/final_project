@@ -3,10 +3,11 @@
 from flask import url_for
 import pytest
 
-from app import DATABASE
+from app import db
 from app.domain import set_unknown_director
 from app.models import Film
 from app.schemas import FilmBase
+from .test_subfunctions import check_count
 
 
 @pytest.mark.parametrize(
@@ -116,7 +117,7 @@ def test_create_film_auth(app_with_data, data, code):
     assert response.status_code == code
 
     if code == 201:
-        count = len(DATABASE.session.query(Film).filter(Film.title == data['title']).all())
+        count = len(db.session.query(Film).filter(Film.title == data['title']).all())
         assert count == 1
 
     app_with_data.get(
@@ -164,7 +165,7 @@ def test_get_film_by_id(app_with_data, film_id, code):
 
     if code == 200:
         data = response.json
-        record = FilmBase.from_orm(DATABASE.session.query(Film).get(film_id)).dict()
+        record = FilmBase.from_orm(db.session.query(Film).get(film_id)).dict()
         assert data == set_unknown_director(record)
 
 
@@ -250,7 +251,7 @@ def test_update_film_by_id_auth(app_with_data, film_id, data, code):
     # then
     assert response.status_code == code
     if code == 200:
-        record = FilmBase.from_orm(DATABASE.session.query(Film).get(film_id)).dict()
+        record = FilmBase.from_orm(db.session.query(Film).get(film_id)).dict()
 
         data = response.json
         assert data == set_unknown_director(record)
@@ -272,11 +273,7 @@ def test_get_all_films_default(app_with_data, page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
@@ -293,11 +290,7 @@ def test_get_all_films(app_with_data, page, per_page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
@@ -313,11 +306,7 @@ def test_get_all_films_by_title_default(app_with_data, title, page, count, code)
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
@@ -332,11 +321,7 @@ def test_get_all_films_by_title(app_with_data, title, page, per_page, count, cod
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(

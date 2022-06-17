@@ -2,72 +2,73 @@
 
 from flask_restx import Resource, fields
 
-from app.crud import USER
-from app.endpoints.todo import TODO
+from app.crud import user
+from app.endpoints.todo import todo
 from loggers import logger
-from .namespaces import user
+from .namespaces import user_ns
 
-USER_CREATE_MODEL = user.model(
+user_create_update_model = user_ns.model(
     'User Create', {'role_id': fields.Integer(description='User role id', example=2),
                     'name': fields.String(description='User name', example='John'),
                     'email': fields.String(description='User email', example='john@gmail.com'),
                     'password': fields.String(description='User password', example='Johny5863')
                     })
 
-USER_MODEL = user.model(
+user_model = user_ns.model(
     'User', {'name': fields.String(description='User name', example='John'),
              'email': fields.String(description='User email', example='john@gmail.com')})
 
 
-@user.route('/<int:user_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='user')
-@user.route('', methods=['POST'], endpoint='user_create')
+@user_ns.route('/<int:user_id>', methods=['GET', 'PUT', 'DELETE'], endpoint='user')
+@user_ns.route('', methods=['POST'], endpoint='user_create')
 class User(Resource):
     """Class for implementing user HTTP requests"""
-
-    @user.response(404, 'Not Found')
-    @user.doc(params={'user_id': 'An ID'})
+    @user_ns.response(200, 'Success')
+    @user_ns.response(404, 'Not Found')
+    @user_ns.doc(params={'user_id': 'An ID'})
     def get(self, user_id):
         """Get one record from the user table"""
-        return TODO.get(record_id=user_id, crud=USER, t_name='user')
+        return todo.get(record_id=user_id, crud=user, t_name='user')
 
-    @user.response(201, 'Created', USER_MODEL)
-    @user.response(400, 'Validation Error')
-    @user.doc(body=USER_CREATE_MODEL)
+    @user_ns.response(201, 'Created', user_model)
+    @user_ns.response(400, 'Validation Error')
+    @user_ns.doc(body=user_create_update_model)
     def post(self):
         """Create new record in the user table"""
         try:
-            return TODO.create(crud=USER, t_name='user')
+            return todo.create(crud=user, t_name='user')
         except ValueError:
             logger.error("Attempt to create user with email that already exist.")
-            user.abort(400, "User with such email already exist.")
+            user_ns.abort(400, "User with such email already exist.")
 
-    @user.response(400, 'Validation Error')
-    @user.response(404, 'Not Found')
-    @user.doc(params={'user_id': 'An ID'}, body=USER_CREATE_MODEL, model=USER_MODEL)
+    @user_ns.response(200, 'Successfully update')
+    @user_ns.response(400, 'Validation Error')
+    @user_ns.response(404, 'Not Found')
+    @user_ns.doc(params={'user_id': 'An ID'}, body=user_create_update_model, model=user_model)
     def put(self, user_id):
         """Update a record in the user table"""
         try:
-            return TODO.update(record_id=user_id, crud=USER, t_name='user')
+            return todo.update(record_id=user_id, crud=user, t_name='user')
         except ValueError:
             logger.error("Attempt to update the email to the one that is already in the database.")
-            user.abort(400, "User with such email already exist.")
+            user_ns.abort(400, "User with such email already exist.")
 
-    @user.response(204, 'Record deleted successfully')
-    @user.response(404, 'Not Found')
-    @user.doc(params={'user_id': 'An ID'})
+    @user_ns.response(204, 'Record deleted successfully')
+    @user_ns.response(404, 'Not Found')
+    @user_ns.doc(params={'user_id': 'An ID'})
     def delete(self, user_id):
         """Delete a record from the user table"""
-        return TODO.delete(record_id=user_id, crud=USER, t_name='user')
+        return todo.delete(record_id=user_id, crud=user, t_name='user')
 
 
-@user.route('/all/<int:page>', methods=['GET'],
-            defaults={'per_page': 10}, endpoint='users_default')
-@user.route('/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='users')
-@user.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
+@user_ns.route('/all/<int:page>', methods=['GET'],
+               defaults={'per_page': 10}, endpoint='users_default')
+@user_ns.route('/all/<int:page>/<int:per_page>', methods=['GET'], endpoint='users')
+@user_ns.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Users(Resource):
     """Class for implementing users get multy request"""
-
-    @user.response(404, 'Not Found')
+    @user_ns.response(200, 'Success')
+    @user_ns.response(404, 'Not Found')
     def get(self, page, per_page):
         """Get all records from the user table"""
-        return TODO.read_all(crud=USER, page=page, per_page=per_page, t_name='user')
+        return todo.read_all(crud=user, page=page, per_page=per_page, t_name='user')

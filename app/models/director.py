@@ -1,11 +1,11 @@
-"""Module with DIRECTOR orm model"""
+"""Module with director orm model"""
 
-from .db_init import DATABASE
+from .db_init import db
 
 
-class Director(DATABASE.Model):
+class Director(db.Model):
     """Class to store directors and information about them"""
     __tablename__ = 'director'
-    director_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    name = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
-    surname = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
+    director_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.VARCHAR(50), nullable=False)
+    surname = db.Column(db.VARCHAR(50), nullable=False)

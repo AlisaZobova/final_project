@@ -1,9 +1,9 @@
-"""Module with FILM_GENRE association table"""
+"""Module with film_genre association table"""
 
-from .db_init import DATABASE
+from .db_init import db
 
-FILM_GENRE = DATABASE.Table(
+film_genre = db.Table(
     "film_genre",
-    DATABASE.Column("film_id", DATABASE.ForeignKey("film.film_id"), primary_key=True),
-    DATABASE.Column("genre_id", DATABASE.ForeignKey("genre.genre_id"), primary_key=True)
+    db.Column("film_id", db.ForeignKey("film.film_id"), primary_key=True),
+    db.Column("genre_id", db.ForeignKey("genre.genre_id"), primary_key=True)
 )

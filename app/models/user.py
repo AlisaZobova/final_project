@@ -1,19 +1,19 @@
-"""Module with USER orm model"""
+"""Module with user orm model"""
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash
 
-from .db_init import DATABASE
+from .db_init import db
 
 
-class User(UserMixin, DATABASE.Model):
+class User(UserMixin, db.Model):
     """Class to store users and information about them"""
     __tablename__ = 'user'
-    user_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    role_id = DATABASE.Column(DATABASE.Integer, DATABASE.ForeignKey('role.role_id'), nullable=False)
-    name = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False)
-    email = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False, unique=True)
-    password = DATABASE.Column(DATABASE.VARCHAR(255), nullable=False)
-    films = DATABASE.relationship('Film', backref='user', cascade='all, delete')
+    user_id = db.Column(db.Integer, primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.role_id'), nullable=False)
+    name = db.Column(db.VARCHAR(50), nullable=False)
+    email = db.Column(db.VARCHAR(50), nullable=False, unique=True)
+    password = db.Column(db.VARCHAR(255), nullable=False)
+    films = db.relationship('Film', backref='user', cascade='all, delete')
 
     def __init__(self, role_id, name, email, password):
         self.role_id = role_id

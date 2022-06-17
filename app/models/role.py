@@ -1,11 +1,11 @@
-"""Module with ROLE orm model"""
+"""Module with role orm model"""
 
-from .db_init import DATABASE
+from .db_init import db
 
 
-class Role(DATABASE.Model):
+class Role(db.Model):
     """Class to store USER roles"""
     __tablename__ = 'role'
-    role_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    name = DATABASE.Column(DATABASE.VARCHAR(50), unique=True)
-    users = DATABASE.relationship('User', backref=DATABASE.backref('role'))
+    role_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.VARCHAR(50), unique=True)
+    users = db.relationship('User', backref=db.backref('role'))

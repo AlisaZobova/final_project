@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from app.endpoints.namespaces import api_bp
 from app.config import Config
 from app import models, endpoints
-from app.models.db_init import DATABASE
+from app.models.db_init import db
 from app.commands import cmd
 from app.auth import auth
 from app.models import User
@@ -21,10 +21,10 @@ def create_app(conf=Config):
     app = Flask(__name__)
     app.config.from_object(conf)
 
-    DATABASE.init_app(app)
+    db.init_app(app)
     app.register_blueprint(cmd, cli_group=None)
     app.register_blueprint(api_bp, url_prefix='/api')
-    MIGRATE.init_app(app, DATABASE)
+    MIGRATE.init_app(app, db)
 
     login_manager = LoginManager()
     login_manager.login_view = 'api.authentication_login'

@@ -1,20 +1,20 @@
-"""Module with FILM orm model"""
+"""Module with film orm model"""
 
-from .db_init import DATABASE
-from .film_director import FILM_DIRECTOR
-from .film_genre import FILM_GENRE
+from .db_init import db
+from .film_director import film_director
+from .film_genre import film_genre
 
 
-class Film(DATABASE.Model):
+class Film(db.Model):
     """Class to store films and information about them"""
     __tablename__ = 'film'
-    film_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    user_id = DATABASE.Column(DATABASE.Integer, DATABASE.ForeignKey(
+    film_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(
         'user.user_id', ondelete='CASCADE'), nullable=False)
-    title = DATABASE.Column(DATABASE.VARCHAR(50), nullable=False, unique=True)
-    poster = DATABASE.Column(DATABASE.VARCHAR(100), nullable=False)
-    description = DATABASE.Column(DATABASE.Text)
-    release_date = DATABASE.Column(DATABASE.Date, nullable=False)
-    rating = DATABASE.Column(DATABASE.Float, nullable=False)
-    directors = DATABASE.relationship("Director", secondary=FILM_DIRECTOR, backref="films")
-    genres = DATABASE.relationship("Genre", secondary=FILM_GENRE, backref="films")
+    title = db.Column(db.VARCHAR(50), nullable=False, unique=True)
+    poster = db.Column(db.VARCHAR(100), nullable=False)
+    description = db.Column(db.Text)
+    release_date = db.Column(db.Date, nullable=False)
+    rating = db.Column(db.Float, nullable=False)
+    directors = db.relationship("Director", secondary=film_director, backref="films")
+    genres = db.relationship("Genre", secondary=film_genre, backref="films")

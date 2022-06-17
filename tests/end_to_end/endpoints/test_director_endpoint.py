@@ -3,9 +3,10 @@
 from flask import url_for
 import pytest
 
-from app import DATABASE
+from app import db
 from app.models import Director
 from app.schemas import DirectorBase
+from .test_subfunctions import check_count
 
 
 @pytest.mark.parametrize(
@@ -30,7 +31,7 @@ def test_create_director(app_with_data, data, code):
     the status code and adding this record to the database
     """
     # when
-    count_before = len(DATABASE.session.query(Director)
+    count_before = len(db.session.query(Director)
                        .filter((Director.name == data['name']) &
                                (Director.surname == data['surname'])).all())
     response = app_with_data.post(url_for("api.director_create"),
@@ -40,7 +41,7 @@ def test_create_director(app_with_data, data, code):
     assert response.status_code == code
 
     if code == 201:
-        count = len(DATABASE.session.query(Director)
+        count = len(db.session.query(Director)
                     .filter((Director.name == data['name']) &
                             (Director.surname == data['surname'])).all())
         assert count == count_before + 1
@@ -59,7 +60,7 @@ def test_get_director_by_id(app_with_data, director_id, code):
 
     if code == 200:
         data = response.json
-        record = DirectorBase.from_orm(DATABASE.session.query(Director).get(director_id))
+        record = DirectorBase.from_orm(db.session.query(Director).get(director_id))
         assert data == record
 
 
@@ -88,7 +89,7 @@ def test_update_director_by_id(app_with_data, director_id, data, code):
     assert response.status_code == code
 
     if code == 200:
-        record = DirectorBase.from_orm(DATABASE.session.query(Director).get(director_id)).dict()
+        record = DirectorBase.from_orm(db.session.query(Director).get(director_id)).dict()
         data = response.json
         assert data == record
 
@@ -105,11 +106,7 @@ def test_get_all_directors_default(app_with_data, page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
@@ -127,11 +124,7 @@ def test_get_all_directors(app_with_data, page, per_page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(

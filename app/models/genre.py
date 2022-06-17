@@ -1,10 +1,10 @@
-"""Module with GENRE orm model"""
+"""Module with genre orm model"""
 
-from .db_init import DATABASE
+from .db_init import db
 
 
-class Genre(DATABASE.Model):
+class Genre(db.Model):
     """Class to store genres"""
     __tablename__ = 'genre'
-    genre_id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    genre_name = DATABASE.Column(DATABASE.VARCHAR(50), unique=True)
+    genre_id = db.Column(db.Integer, primary_key=True)
+    genre_name = db.Column(db.VARCHAR(50), unique=True)

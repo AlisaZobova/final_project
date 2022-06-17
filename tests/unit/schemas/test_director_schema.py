@@ -7,33 +7,26 @@ from app.schemas import DirectorBase
 
 
 @pytest.mark.parametrize(
-    "data, valid",
+    "data",
     [
-        ({
-            "name": "Thomas",
-            "surname": "Shelby"
-        }, True),
         ({
             "name": "thomas",
             "surname": "Shelby"
-        }, False),
+        }),
         ({
             "name": "Thomas",
             "surname": "shelby"
-        }, False),
+        }),
         ({
             "name": "4",
             "surname": "Shelby"
-        }, False),
+        }),
         ({
             "name": "Thomas",
             "surname": "4"
-        }, False)
+        })
     ])
-def test_validate_user(app_with_db, data, valid):
+def test_validate_director(app_with_db, data):
     """Checking for a validation error when entering invalid data"""
-    try:
+    with pytest.raises(ValidationError):
         DirectorBase.parse_obj(data)
-        assert valid
-    except ValidationError:
-        assert not valid

@@ -3,9 +3,10 @@
 from flask import url_for
 import pytest
 
-from app import DATABASE, User
+from app import db, User
 from app.schemas import UserBase
 from loggers import logger
+from .test_subfunctions import check_count
 
 
 @pytest.mark.parametrize(
@@ -49,7 +50,7 @@ def test_create_user(app_with_data, data, code):
     assert response.status_code == code
 
     if code == 201:
-        count = len(DATABASE.session.query(User).filter(User.email == data['email']).all())
+        count = len(db.session.query(User).filter(User.email == data['email']).all())
         assert count == 1
 
 
@@ -66,7 +67,7 @@ def test_get_user_by_id(app_with_data, user_id, code):
 
     if code == 200:
         data = response.json
-        record = UserBase.from_orm(DATABASE.session.query(User).get(user_id))
+        record = UserBase.from_orm(db.session.query(User).get(user_id))
         assert data == record
 
 
@@ -96,12 +97,12 @@ def test_update_user_by_id(app_with_data, user_id, data, code):
     # when
     response = app_with_data.put(url_for("api.user", user_id=user_id),
                                  json=data)
-    users = DATABASE.session.query(User).get(6).__dict__
+    users = db.session.query(User).get(6).__dict__
     logger.info("%s", str(users))
     # then
     assert response.status_code == code
     if code == 200:
-        record = UserBase.from_orm(DATABASE.session.query(User).get(user_id)).dict()
+        record = UserBase.from_orm(db.session.query(User).get(user_id)).dict()
         data = response.json
         assert data == record
 
@@ -118,11 +119,7 @@ def test_get_all_users_default(app_with_data, page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
@@ -142,11 +139,7 @@ def test_get_all_users(app_with_data, page, per_page, count, code):
     )
 
     # then
-    assert response.status_code == code
-    data = response.json
-
-    if count != 0:
-        assert len(data) == count
+    check_count(response, code, count)
 
 
 @pytest.mark.parametrize(
