@@ -2,8 +2,8 @@
 
 import pytest
 
-from app import DATABASE, User
-from app.crud import USER
+from app import db, User
+from app.crud import user
 from app.schemas import UserBase
 
 
@@ -18,10 +18,10 @@ from app.schemas import UserBase
 ])
 def test_create(app_with_data, data, expected_type):
     """Checking the function of creating a record"""
-    before = len(DATABASE.session.query(User).all())
-    user = USER.create(database=DATABASE.session, obj_in=data)
-    after = len(DATABASE.session.query(User).all())
-    assert isinstance(user, expected_type)
+    before = len(db.session.query(User).all())
+    new_user = user.create(obj_in=data)
+    after = len(db.session.query(User).all())
+    assert isinstance(new_user, expected_type)
     assert after == before + 1
 
 
@@ -34,35 +34,35 @@ def test_create_error(app_with_data):
             "email": "jacky@gmail.com",
             "password": "Jack895"
         }
-        USER.create(database=DATABASE.session, obj_in=data)
+        user.create(obj_in=data)
 
 
 def test_get(app_with_data):
     """Checking the returned data of the get method"""
-    user = USER.get(database=DATABASE.session, record_id=6)
-    assert isinstance(user, UserBase)
-    assert UserBase.from_orm(DATABASE.session.query(User).get(6)) == user
+    get_user = user.get(record_id=6)
+    assert isinstance(get_user, UserBase)
+    assert UserBase.from_orm(db.session.query(User).get(6)) == get_user
 
 
 def test_get_multy(app_with_data):
     """Checking the returned data and the number of records of the get multy method"""
-    users = USER.get_multi(database=DATABASE.session)
+    users = user.get_multi()
     assert all(isinstance(user, UserBase) for user in users.__root__)
     assert len(users.dict()['__root__']) == 10
 
 
 def test_update(app_with_data):
     """Checking the correctness of data update and return value"""
-    user_before = DATABASE.session.query(User).get(6)
-    state = DATABASE.inspect(user_before)
-    user = USER.update(database=DATABASE.session, database_obj=user_before, obj_in={
+    user_before = db.session.query(User).get(6)
+    state = db.inspect(user_before)
+    upd_user = user.update(record_id=6, obj_in={
         "name": "Jack",
         "email": "jack350@gmail.com",
     })
     assert bool(state.attrs.name.history.unchanged)
     assert bool(state.attrs.email.history.unchanged)
-    assert isinstance(user, UserBase)
-    assert user.dict() == {
+    assert isinstance(upd_user, UserBase)
+    assert upd_user.dict() == {
         "name": "Jack",
         "email": "jack350@gmail.com",
     }
@@ -71,8 +71,7 @@ def test_update(app_with_data):
 def test_update_error(app_with_data):
     """Checking that an entry cannot be created  with a duplicate email and an error occurs"""
     with pytest.raises(ValueError):
-        user_before = DATABASE.session.query(User).get(10)
-        USER.update(database=DATABASE.session, database_obj=user_before, obj_in={
+        user.update(record_id=10, obj_in={
             "name": "Jack",
             "email": "jacky@gmail.com",
         })
@@ -83,9 +82,9 @@ def test_delete(app_with_data):
     Record deletion check and comparison of the
     number of records before and after applying the function
     """
-    before = len(DATABASE.session.query(User).all())
-    user = USER.remove(database=DATABASE.session, record_id=5)
-    after = len(DATABASE.session.query(User).all())
-    assert DATABASE.session.query(User).get(5) is None
-    assert isinstance(user, UserBase)
+    before = len(db.session.query(User).all())
+    del_user = user.remove(record_id=5)
+    after = len(db.session.query(User).all())
+    assert db.session.query(User).get(5) is None
+    assert isinstance(del_user, UserBase)
     assert after == before - 1

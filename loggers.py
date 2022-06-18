@@ -1,7 +1,5 @@
 """Loggers"""
 
-# pylint: disable=C0103
-
 import logging.config
 import yaml
 

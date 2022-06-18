@@ -56,7 +56,7 @@ class TodoBase:
         """Method for future delete request"""
         try:
             record = delete(crud, record_id).dict()
-            logger.info(f'Deleted %s with ID %d. %s', t_name, record_id, str(record))
+            logger.info('Deleted %s with ID %d. %s', t_name, record_id, str(record))
             return flask.Response(status=204)
         except UnmappedInstanceError:
             logger.error("Attempt to delete record from %s table with id %d, "
@@ -75,8 +75,8 @@ class TodoBase:
                         page, t_name, per_page)
             return jsonify(records['__root__'])
         except NotFound:
-            api.abort(404, message=f"No more records in {t_name} table.")
             logger.warning("No more records in %s table.", t_name)
+            api.abort(404, message=f"No more records in {t_name} table.")
 
 
-TODO = TodoBase()
+todo = TodoBase()

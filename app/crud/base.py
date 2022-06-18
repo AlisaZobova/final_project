@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, Generic, List, Optional, Union
 from fastapi.encoders import jsonable_encoder
-from app.models.db_init import DATABASE
 from .abstract import CRUDAbstract, ModelType, CreateSchemaType, \
                       UpdateSchemaType, BaseSchemaType
 
@@ -16,36 +15,54 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
     * `list_schema`: A list of Pydantic models
     """
 
-    def get(self, database: DATABASE.session, record_id: Any) -> Optional[BaseSchemaType]:
+    def get(self, record_id: Any) -> Optional[BaseSchemaType]:
         """Method to read one record by id"""
-        return self.schema.from_orm(database.query(self.model).get(record_id))
+        return self.schema.from_orm(self.database.query(self.model).get(record_id))
 
     def get_multi(
-            self, database: DATABASE.session, *,
+            self, *,
             page=1, per_page: int = 10
     ) -> List[BaseSchemaType]:
         """Method to read all records from a table with default pagination set to 10"""
         return self.list_schema.from_orm(
-            [self.schema.from_orm(item) for item in database.query(self.model).paginate(
+            [self.schema.from_orm(item) for item in self.database.query(self.model).paginate(
                 page=page, per_page=per_page).items])
 
-    def create(self, database: DATABASE.session, obj_in: Union[CreateSchemaType, Dict[str, Any]],
-               **kwargs) -> BaseSchemaType:
+    def create(self, obj_in: Union[CreateSchemaType, Dict[str, Any]], **kwargs) -> BaseSchemaType:
         """Method to create one record"""
-        obj_in_data = jsonable_encoder(obj_in)
-        self.check_db_error(database, obj_in_data)
-        record = self.schema.parse_obj(obj_in_data)
-        database_obj = self.model(**obj_in_data)
-        database.add(database_obj)
-        database.commit()
-        database.refresh(database_obj)
+        record = self.check_validate_create(obj_in)
+        database_obj = self.model(**obj_in)
+        self.database.add(database_obj)
+        self.database.commit()
+        self.database.refresh(database_obj)
         return record
 
-    def update(self, database: DATABASE.session, *, database_obj: ModelType,
+    def update(self, *, record_id: int,
                obj_in: Union[UpdateSchemaType, Dict[str, Any]]) -> BaseSchemaType:
         """Method to update one record"""
+        database_obj = self.check_validate_update(obj_in, record_id)
+        record = self.schema.from_orm(database_obj)
+        self.database.commit()
+        self.database.refresh(database_obj)
+        return record
+
+    def remove(self, *, record_id: int) -> ModelType:
+        """Method to delete one record by id"""
+        obj = self.database.query(self.model).get(record_id)
+        self.database.delete(obj)
+        self.database.commit()
+        return self.schema.from_orm(obj)
+
+    def check_db_error(self, data: Dict[str, Any]):
+        """Method for checking database errors"""
+
+    def check_validate_update(
+            self, obj_in: Union[CreateSchemaType, Dict[str, Any]], record_id: int
+    ):
+        """Method returning a validated object to update"""
+        database_obj = self.database.query(self.model).get(record_id)
         obj_data = jsonable_encoder(database_obj)
-        self.check_db_error(database, obj_in)
+        self.check_db_error(obj_in)
         self.update_schema.parse_obj(obj_in)
         if isinstance(obj_in, dict):
             update_data = obj_in
@@ -54,18 +71,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
         for field in obj_data:
             if field in update_data:
                 setattr(database_obj, field, update_data[field])
-        record = self.schema.from_orm(database_obj)
-        database.add(database_obj)
-        database.commit()
-        database.refresh(database_obj)
+        return database_obj
+
+    def check_validate_create(self, obj_in: Union[CreateSchemaType, Dict[str, Any]], **kwargs):
+        """Method returning a validated object to create"""
+        obj_in_data = jsonable_encoder(obj_in)
+        self.check_db_error(obj_in_data)
+        record = self.schema.parse_obj(obj_in_data)
         return record
-
-    def remove(self, database: DATABASE.session, *, record_id: int) -> BaseSchemaType:
-        """Method to delete one record by id"""
-        obj = database.query(self.model).get(record_id)
-        database.delete(obj)
-        database.commit()
-        return self.schema.from_orm(obj)
-
-    def check_db_error(self, database, data):
-        """Method for checking database errors"""

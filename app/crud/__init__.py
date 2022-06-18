@@ -1,6 +1,6 @@
 """CRUD module __init__"""
 
-from .director import DIRECTOR
-from .film import FILM
-from .genre import GENRE
-from .user import USER
+from .director import director
+from .film import film
+from .genre import genre
+from .user import user

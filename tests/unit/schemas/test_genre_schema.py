@@ -7,25 +7,19 @@ from app.schemas import GenreBase
 
 
 @pytest.mark.parametrize(
-    "data, valid",
+    "data",
     [
         ({
-            "genre_name": "Comedy"
-        }, True),
-        ({
             "genre_name": 25
-        }, False),
+        }),
         ({
             "genre_name": "comedy"
-        }, False),
+        }),
         ({
             "genre_name": "Comedy2"
-        }, False)
+        })
     ])
-def test_validate_user(app_with_db, data, valid):
+def test_validate_genre(app_with_db, data):
     """Checking for a validation error when entering invalid data"""
-    try:
+    with pytest.raises(ValidationError):
         GenreBase.parse_obj(data)
-        assert valid
-    except ValidationError:
-        assert not valid
