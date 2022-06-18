@@ -17,6 +17,13 @@ class UserBase(BaseModel):
             raise ValueError("Incorrect name!")
         return value
 
+    @validator("email")
+    def check_email(cls, value):
+        """Check email field"""
+        if len(value) > 50:
+            raise ValueError("Too long email!")
+        return value
+
     class Config:
         """Configuration class"""
         orm_mode = True

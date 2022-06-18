@@ -80,17 +80,19 @@ film_model = film_ns.model('Film', {
 @film_ns.route('', methods=['POST'], endpoint='film_create')
 class FilmBase(Resource):
     """Class for implementing film HTTP requests"""
-    @film_ns.response(200, 'Success')
-    @film_ns.response(404, 'Not Found')
-    @film_ns.doc(params={'film_id': 'An ID'})
+
+    @film_ns.doc(
+        params={'film_id': 'An ID'},
+        responses={200: 'Success', 404: 'Not Found'}
+    )
     def get(self, film_id):
         """Get one record from the film table"""
         film_rec = todo.get(record_id=film_id, crud=film, t_name='film')
         return set_unknown_director(film_rec)
 
-    @film_ns.response(201, 'Created', model=film_model)
-    @film_ns.response(401, 'Unauthorized')
+    @film_ns.response(201, 'Record created successfully', model=film_model)
     @film_ns.response(400, 'Validation Error')
+    @film_ns.response(401, 'Unauthorized')
     @film_ns.doc(body=film_create_model)
     def post(self):
         """Create new record in the film table"""
@@ -114,10 +116,9 @@ class FilmBase(Resource):
         try:
             film_record = create_film(film, values=values,
                                       directors_id=directors_id,
-                                      genres_id=genres_id)
-
+                                      genres_id=genres_id).dict()
             logger.info('Created new film with such fields\n%s.', str(values))
-            return film_record, 201
+            return set_unknown_director(film_record), 201
 
         except (ValidationError, DataError) as error:
             logger.error("Incorrect data entered. "
@@ -142,12 +143,15 @@ class FilmBase(Resource):
                                "can make changes to a film. Access denied.")
         return True
 
-    @film_ns.doc(model=film_model, body=film_update_model)
-    @film_ns.doc(params={'film_id': 'An ID'})
-    @film_ns.response(200, 'Successfully update')
-    @film_ns.response(401, 'Unauthorized')
-    @film_ns.response(403, 'Forbidden')
-    @film_ns.response(404, 'Not Found')
+    @film_ns.doc(
+        model=film_model,
+        body=film_update_model,
+        params={'film_id': 'An ID'},
+        responses={200: 'Record updated successfully',
+                   401: 'Unauthorized',
+                   403: 'Forbidden',
+                   404: 'Not Found'}
+    )
     def put(self, film_id):
         """Update a record in the film table"""
         try:
@@ -166,11 +170,13 @@ class FilmBase(Resource):
             logger.error("Attempt to update film title to the one that is already in the database.")
             film_ns.abort(400, "Film with such title already exist.")
 
-    @film_ns.doc(params={'film_id': 'An ID'})
-    @film_ns.response(204, 'Record deleted successfully')
-    @film_ns.response(401, 'Unauthorized')
-    @film_ns.response(403, 'Forbidden')
-    @film_ns.response(404, 'Not Found')
+    @film_ns.doc(
+        params={'film_id': 'An ID'},
+        responses={204: 'Record deleted successfully',
+                   401: 'Unauthorized',
+                   403: 'Forbidden',
+                   404: 'Not Found'}
+    )
     def delete(self, film_id):
         """Delete a record from the film table"""
         try:
@@ -190,8 +196,7 @@ class FilmBase(Resource):
 @film_ns.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Films(Resource):
     """Class for implementing films get multy request"""
-    @film_ns.response(200, 'Success')
-    @film_ns.response(404, 'Not Found')
+    @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page, per_page):
         """Get all records from the film table"""
         try:
@@ -212,8 +217,7 @@ class Films(Resource):
                      'title': "Part of the film's title"})
 class FilmsTitle(Resource):
     """Class for implementing films get multy request"""
-    @film_ns.response(200, 'Success')
-    @film_ns.response(404, 'Not Found')
+    @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page, per_page, title):
         """Get all records from the film table by partial coincidence of title"""
         try:
@@ -243,8 +247,7 @@ class FilmsTitle(Resource):
                                            'Comedy — if only one genre'}})
 class FilmsFiltered(Resource):
     """Class for implementing films get multy filtered request"""
-    @film_ns.response(200, 'Success')
-    @film_ns.response(404, 'Not Found')
+    @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page, per_page):
         """Get all records from the film table filtered by genres, release_date and directors"""
         data = [request.args.get('release_date', default=None),
@@ -274,8 +277,7 @@ class FilmsFiltered(Resource):
                                 'example': 'asc — for ascending order, desc — for descending'}})
 class FilmsSorted(Resource):
     """Class for implementing films get multy sorted request"""
-    @film_ns.response(200, 'Success')
-    @film_ns.response(404, 'Not Found')
+    @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page: int, per_page: int):
         """Get all records from the film table sorted by release_date and rating"""
         order = [request.args.get('release_date', default=None),

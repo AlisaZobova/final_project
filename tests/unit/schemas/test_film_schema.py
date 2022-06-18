@@ -52,10 +52,22 @@ from app.schemas import FilmBase
             "directors": [],
             "genres": []
         }
+        ),
+        ({
+            "title": "Peaky Blinders",
+            "poster": "https://www.posters.net/Peaky-Blinders-poster/yyyyyyyyyyyyyyyyyyyyyyy"
+                      "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+            "description": "A gangster family epic set in 1900s England.",
+            "release_date": "2013-09-12",
+            "rating": 9.5,
+            "user_id": 4,
+            "directors": [],
+            "genres": []
+        }
         )
     ]
 )
-def test_validate_film(app_with_data, data):
+def test_validate_film(data):
     """Checking for a validation error when entering invalid data"""
     with pytest.raises(ValidationError):
         FilmBase.parse_obj(data)

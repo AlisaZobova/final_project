@@ -19,7 +19,7 @@ from app.schemas import GenreBase
             "genre_name": "Comedy2"
         })
     ])
-def test_validate_genre(app_with_db, data):
+def test_validate_genre(data):
     """Checking for a validation error when entering invalid data"""
     with pytest.raises(ValidationError):
         GenreBase.parse_obj(data)

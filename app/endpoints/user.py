@@ -23,14 +23,16 @@ user_model = user_ns.model(
 @user_ns.route('', methods=['POST'], endpoint='user_create')
 class User(Resource):
     """Class for implementing user HTTP requests"""
-    @user_ns.response(200, 'Success')
-    @user_ns.response(404, 'Not Found')
-    @user_ns.doc(params={'user_id': 'An ID'})
+
+    @user_ns.doc(
+        params={'user_id': 'An ID'},
+        responses={200: 'Success', 404: 'Not Found'}
+    )
     def get(self, user_id):
         """Get one record from the user table"""
         return todo.get(record_id=user_id, crud=user, t_name='user')
 
-    @user_ns.response(201, 'Created', user_model)
+    @user_ns.response(201, 'Record created successfully', user_model)
     @user_ns.response(400, 'Validation Error')
     @user_ns.doc(body=user_create_update_model)
     def post(self):
@@ -41,10 +43,14 @@ class User(Resource):
             logger.error("Attempt to create user with email that already exist.")
             user_ns.abort(400, "User with such email already exist.")
 
-    @user_ns.response(200, 'Successfully update')
-    @user_ns.response(400, 'Validation Error')
-    @user_ns.response(404, 'Not Found')
-    @user_ns.doc(params={'user_id': 'An ID'}, body=user_create_update_model, model=user_model)
+    @user_ns.doc(
+        params={'user_id': 'An ID'},
+        body=user_create_update_model,
+        model=user_model,
+        responses={200: 'Record updated successfully',
+                   400: 'Validation Error',
+                   404: 'Not Found'}
+    )
     def put(self, user_id):
         """Update a record in the user table"""
         try:
@@ -53,9 +59,11 @@ class User(Resource):
             logger.error("Attempt to update the email to the one that is already in the database.")
             user_ns.abort(400, "User with such email already exist.")
 
-    @user_ns.response(204, 'Record deleted successfully')
-    @user_ns.response(404, 'Not Found')
-    @user_ns.doc(params={'user_id': 'An ID'})
+    @user_ns.doc(
+        params={'user_id': 'An ID'},
+        responses={204: 'Record deleted successfully',
+                   404: 'Not Found'}
+    )
     def delete(self, user_id):
         """Delete a record from the user table"""
         return todo.delete(record_id=user_id, crud=user, t_name='user')
@@ -67,8 +75,8 @@ class User(Resource):
 @user_ns.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page'})
 class Users(Resource):
     """Class for implementing users get multy request"""
-    @user_ns.response(200, 'Success')
-    @user_ns.response(404, 'Not Found')
+
+    @user_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page, per_page):
         """Get all records from the user table"""
         return todo.read_all(crud=user, page=page, per_page=per_page, t_name='user')

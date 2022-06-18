@@ -35,6 +35,12 @@ from .test_subfunctions import check_count
             "name": "John",
             "email": "johny.com",
             "password": "Johny5863"
+        }, 400),
+        ({
+            "role_id": 1,
+            "name": "Jack",
+            "email": "jackyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy@gmail.com",
+            "password": "Jack895"
         }, 400)
     ])
 def test_create_user(app_with_data, data, code):
