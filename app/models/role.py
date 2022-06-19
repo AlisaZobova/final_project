@@ -4,7 +4,7 @@ from .db_init import db
 
 
 class Role(db.Model):
-    """Class to store USER roles"""
+    """Class to store user roles"""
     __tablename__ = 'role'
     role_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.VARCHAR(50), unique=True)

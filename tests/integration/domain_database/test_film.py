@@ -45,13 +45,13 @@ def test_create_film(app_with_data, data, directors_id, genres_id):
 
 
 def test_set_unknown_director(app_with_data):
-    """Checking if the directors field is UNKNOWN if the movie has no directors"""
+    """Checking the directors field is UNKNOWN if the movie has no directors"""
     set_film = FilmBase.from_orm(db.session.query(Film).get(5)).dict()
     unknown = set_unknown_director(set_film)
     assert unknown['directors'] == 'UNKNOWN'
 
 
 def test_set_unknown_multy():
-    """Checking if the directors field is UNKNOWN if the movie has no directors"""
+    """Checking the directors field is UNKNOWN if the movie has no directors"""
     films = film.get_multi().dict()
     assert set_unknown_director_multy(films)['__root__'][4]['directors'] == 'UNKNOWN'

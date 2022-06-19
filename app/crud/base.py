@@ -7,7 +7,6 @@ from pydantic import BaseModel
 from app.models.db_init import db
 from .abstract import CRUDAbstract
 
-
 ModelType = TypeVar("ModelType", bound=db.Model)
 BaseSchemaType = TypeVar("BaseSchemaType", bound=BaseModel)
 ListSchemaType = TypeVar("ListSchemaType", bound=BaseModel)
@@ -25,6 +24,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
     * `list_schema`: A list of Pydantic models
     * `database`: SQLAlchemy session
     """
+
     def __init__(self, model: Type[ModelType], schema: Type[BaseSchemaType],
                  update_schema: Type[UpdateSchemaType], list_schema: Type[ListSchemaType],
                  database=db.session):
@@ -34,14 +34,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
         self.update_schema = update_schema
         self.database = database
 
-    def get(self, record_id: Any) -> Optional[BaseSchemaType]:
+    def get(self, record_id: int) -> Optional[BaseSchemaType]:
         """Method to read one record by id"""
         return self.schema.from_orm(self.database.query(self.model).get(record_id))
 
-    def get_multi(
-            self, *,
-            page=1, per_page: int = 10
-    ) -> List[BaseSchemaType]:
+    def get_multi(self, *, page: int = 1, per_page: int = 10) -> ListSchemaType:
         """Method to read all records from a table with default pagination set to 10"""
         return self.list_schema.from_orm(
             [self.schema.from_orm(item) for item in self.database.query(self.model).paginate(
@@ -56,8 +53,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
         self.database.refresh(database_obj)
         return record
 
-    def update(self, *, record_id: int,
-               obj_in: Union[UpdateSchemaType, Dict[str, Any]]) -> BaseSchemaType:
+    def update(
+            self, *, record_id: int,
+            obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+    ) -> BaseSchemaType:
         """Method to update one record"""
         database_obj = self.check_validate_update(obj_in, record_id)
         record = self.schema.from_orm(database_obj)

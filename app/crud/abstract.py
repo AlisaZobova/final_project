@@ -10,7 +10,7 @@ class CRUDAbstract(ABC):
     """
 
     @abstractmethod
-    def get(self, record_id: Any):
+    def get(self, record_id: int):
         """Method to read one record by id"""
 
     @abstractmethod

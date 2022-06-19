@@ -1,4 +1,4 @@
-"""Module with FILM CRUD realisation"""
+"""Module with film CRUD realisation"""
 
 from typing import List, Dict, Any
 from fastapi.encoders import jsonable_encoder
@@ -6,13 +6,14 @@ from sqlalchemy import extract
 
 from app.models import Genre, Director, Film
 from app.schemas.film import FilmCreate, FilmUpdate, FilmBase, FilmList
+from app.models.db_init import db
 from .base import CRUDBase
 from .film_base import FilmAbstract
 
 
 class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
-    """A class that inherits the base self class and implements
-    own methods to perform self operations for the FILM model"""
+    """A class that inherits the base CRUD class and implements
+    own methods to perform operations for the film model"""
 
     def create(self, obj_in: Dict[str, Any], **kwargs) -> FilmBase:
         """Method to create one record"""
@@ -23,8 +24,8 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
         self.database.refresh(database_obj)
         return new_film
 
-    def check_db_error(self, data):
-        """Method for checking database errors"""
+    def check_db_error(self, data: Dict[str, Any]):
+        """Method for checking title duplicates"""
         if 'title' in data.keys():
             if len(self.database.query(self.model)
                    .filter(self.model.title == data['title']).all()) != 0:
@@ -53,13 +54,11 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
         """Method for creating multy queries"""
         return self.database.query(self.model)
 
-    def query_paginate(self, query, page: int = 1, per_page: int = 10):
+    def query_paginate(self, query: db.session.query, page: int = 1, per_page: int = 10):
         """Method for pagination multy queries"""
         return query.paginate(page=page, per_page=per_page).items
 
-    def get_multi_by_title(
-            self, title: str, page=1, per_page: int = 10
-    ) -> List[FilmBase]:
+    def get_multi_by_title(self, title: str, page: int = 1, per_page: int = 10) -> FilmList:
         """A method that searches for a partial match of a movie title"""
         title = f'%{title}%'
         return self.list_schema.from_orm(
@@ -67,27 +66,28 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
              self.query_paginate(
                  self.multy_query()
                  .filter(self.model.title.ilike(title))
-                 .order_by(self.model.film_id.asc()), page=page, per_page=per_page)])
+                 .order_by(self.model.film_id.asc()),
+                 page=page, per_page=per_page)])
 
-    def date_filter(self, query, value):
+    def date_filter(self, query: db.session.query, value: str):
         """Method for filtering by release date"""
         start_year, end_year = value.split('-')
         return query.filter(extract('year', self.model.release_date).between(start_year, end_year))
 
-    def director_filter(self, query, value):
+    def director_filter(self, query: db.session.query, value: str):
         """Method for filtering by directors"""
         directors_names = value.split('&')
         return query.filter(self.model.directors
                             .any((Director.name + '_' + Director.surname).in_(directors_names)))
 
-    def genre_filter(self, query, value):
+    def genre_filter(self, query: db.session.query, value: str):
         """Method for filtering by genres"""
         genres_names = value.split('&')
         return query.filter(self.model.genres.any(Genre.genre_name.in_(genres_names)))
 
     def query_film_multy_filter(
-            self, values: List[str], page=1, per_page=10
-    ):
+            self, values: List[str], page: int = 1, per_page: int = 10
+    ) -> FilmList:
         """Method for filtering records by genres, release_date and directors"""
         query = self.database.query(self.model).distinct()
 
@@ -103,26 +103,26 @@ class CRUDFilm(CRUDBase[Film, FilmCreate, FilmUpdate], FilmAbstract):
              .order_by(self.model.film_id.asc())
              .paginate(page=page, per_page=per_page).items])
 
-    def date_asc(self, query):
+    def date_asc(self, query: db.session.query):
         """Method to sort by date in ascending order"""
         return query.order_by(self.model.release_date.asc())
 
-    def date_desc(self, query):
+    def date_desc(self, query: db.session.query):
         """Method to sort by date in descending order"""
         return query.order_by(self.model.release_date.desc())
 
-    def rating_asc(self, query):
+    def rating_asc(self, query: db.session.query):
         """Method to sort by rating in ascending order"""
         return query.order_by(self.model.rating.asc())
 
-    def rating_desc(self, query):
+    def rating_desc(self, query: db.session.query):
         """Method to sort by rating in descending order"""
         return query.order_by(self.model.rating.desc())
 
     def query_film_multy_sort(
             self, order: List[str],
             page: int = 1, per_page: int = 10
-    ):
+    ) -> FilmList:
         """Method for sorting records by release_date and rating"""
         query = self.multy_query()
 

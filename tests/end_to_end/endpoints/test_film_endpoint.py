@@ -25,8 +25,7 @@ from .test_subfunctions import check_count
 def test_create_film_no_auth(app_with_data, data):
     """Checking that it is not possible to create a film without prior authentication"""
     # when
-    response = app_with_data.post(url_for("api.film_create"),
-                                  json=data)
+    response = app_with_data.post(url_for("api.film_create"), json=data)
 
     # then
     assert response.status_code == 401
@@ -123,8 +122,7 @@ def test_create_film_auth(app_with_data, data, code):
             "password": "Johny5863"
         }
     )
-    response = app_with_data.post(url_for("api.film_create"),
-                                  json=data)
+    response = app_with_data.post(url_for("api.film_create"), json=data)
 
     # then
     assert response.status_code == code
@@ -143,7 +141,7 @@ def test_create_film_auth(app_with_data, data, code):
 
 
 def test_create_film_duplicate(app_with_data):
-    """Checking the impossibility of creating a film with a duplicate title """
+    """Checking the impossibility of creating a film with a duplicate title"""
     app_with_data.post(
         url_for("api.authentication_login"),
         json={
@@ -194,8 +192,7 @@ def test_get_film_by_id(app_with_data, film_id, code):
 def test_update_film_by_id_no_auth(app_with_data, data, film_id):
     """Checking that a film cannot be updated by an unauthenticated user"""
     # when
-    response = app_with_data.put(url_for("api.film", film_id=film_id),
-                                 json=data)
+    response = app_with_data.put(url_for("api.film", film_id=film_id), json=data)
 
     # then
     assert response.status_code == 401
@@ -219,8 +216,7 @@ def test_update_film_by_id_bad_auth(app_with_data, film_id, data):
             "password": "Jacky"
         }
     )
-    response = app_with_data.put(url_for("api.film", film_id=film_id),
-                                 json=data)
+    response = app_with_data.put(url_for("api.film", film_id=film_id), json=data)
 
     # then
     assert response.status_code == 403
@@ -262,8 +258,7 @@ def test_update_film_by_id_auth(app_with_data, film_id, data, code):
             "password": "Johny5863"
         }
     )
-    response = app_with_data.put(url_for("api.film", film_id=film_id),
-                                 json=data)
+    response = app_with_data.put(url_for("api.film", film_id=film_id), json=data)
 
     # then
     assert response.status_code == code
@@ -285,8 +280,7 @@ def test_get_all_films_default(app_with_data, page, count, code):
     """Checks the number of records received and status code"""
     # when
     response = app_with_data.get(
-        url_for("api.films_default",
-                page=page, per_page=None)
+        url_for("api.films_default", page=page, per_page=None)
     )
 
     # then
@@ -318,8 +312,7 @@ def test_get_all_films_by_title_default(app_with_data, title, page, count, code)
     """Checks the number of records received and status code"""
     # when
     response = app_with_data.get(
-        url_for("api.films_title_default",
-                title=title, page=page, per_page=None)
+        url_for("api.films_title_default", title=title, page=page, per_page=None)
     )
 
     # then
@@ -349,8 +342,7 @@ def test_get_all_films_sorted_default(app_with_data, page, order, code):
     """Checks the number of records received and status code"""
     # when
     response = app_with_data.get(
-        url_for("api.films_sort_default",
-                order=order, page=page, per_page=None)
+        url_for("api.films_sort_default", order=order, page=page, per_page=None)
     )
 
     # then
@@ -381,8 +373,7 @@ def test_get_all_films_filtered_default(app_with_data, page, data, code):
     """Checks the number of records received and status code"""
     # when
     response = app_with_data.get(
-        url_for("api.films_filter_default",
-                data=data, page=page, per_page=None)
+        url_for("api.films_filter_default", data=data, page=page, per_page=None)
     )
 
     # then
