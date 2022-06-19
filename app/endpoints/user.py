@@ -25,6 +25,7 @@ class User(Resource):
     """Class for implementing user HTTP requests"""
 
     @user_ns.doc(
+        model=user_model,
         params={'user_id': 'An ID'},
         responses={200: 'Success', 404: 'Not Found'}
     )

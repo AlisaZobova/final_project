@@ -18,6 +18,7 @@ class Director(Resource):
     """Class for implementing director HTTP requests"""
 
     @director_ns.doc(
+        model=director_model,
         params={'director_id': 'An ID'},
         responses={200: 'Success', 404: 'Not Found'}
     )

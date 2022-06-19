@@ -17,6 +17,7 @@ class Genre(Resource):
     """Class for implementing genre HTTP requests"""
 
     @genre_ns.doc(
+        model=genre_model,
         params={'genre_id': 'An ID'},
         responses={200: 'Success', 404: 'Not Found'}
     )
