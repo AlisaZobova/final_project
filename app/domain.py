@@ -2,7 +2,8 @@
 
 from typing import Union, Dict, Any, List
 
-from .crud.abstract import CRUDAbstract, CreateSchemaType, UpdateSchemaType
+from .crud.abstract import CRUDAbstract
+from .crud.base import CreateSchemaType, UpdateSchemaType
 from .crud.film_base import FilmAbstract
 
 
@@ -46,9 +47,7 @@ def create_film(
     """Method to create one film record"""
     genres_id = genres_id.split('&')
     directors_id = directors_id.split('&')
-    film = crud.create(obj_in=values,
-                       directors=directors_id, genres=genres_id).dict()
-    film['release_date'] = film['release_date'].isoformat()
+    film = crud.create(obj_in=values, directors=directors_id, genres=genres_id)
     return film
 
 

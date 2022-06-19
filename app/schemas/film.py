@@ -31,6 +31,13 @@ class FilmBase(BaseModel):
             raise ValueError("Incorrect title!")
         return value
 
+    @validator("poster")
+    def check_poster(cls, value):
+        """Check poster field"""
+        if len(value) > 100:
+            raise ValueError("Too long poster url!")
+        return value
+
     class Config:
         """Configuration class"""
         orm_mode = True

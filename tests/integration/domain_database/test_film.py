@@ -1,6 +1,4 @@
-"""Testing film domain functions"""
-
-from typing import Dict
+"""Testing film domain_database functions"""
 
 import pytest
 
@@ -43,7 +41,7 @@ def test_create_film(app_with_data, data, directors_id, genres_id):
     and the type of the value returned by the function
     """
     new_film = create_film(film, values=data, directors_id=directors_id, genres_id=genres_id)
-    assert isinstance(new_film, Dict)
+    assert isinstance(new_film, FilmBase)
 
 
 def test_set_unknown_director(app_with_data):

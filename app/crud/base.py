@@ -1,9 +1,18 @@
 """Module with base CRUD realisation"""
 
-from typing import Any, Dict, Generic, List, Optional, Union
+from typing import Any, Dict, Generic, List, Optional, Union, Type, TypeVar
 from fastapi.encoders import jsonable_encoder
-from .abstract import CRUDAbstract, ModelType, CreateSchemaType, \
-                      UpdateSchemaType, BaseSchemaType
+from pydantic import BaseModel
+
+from app.models.db_init import db
+from .abstract import CRUDAbstract
+
+
+ModelType = TypeVar("ModelType", bound=db.Model)
+BaseSchemaType = TypeVar("BaseSchemaType", bound=BaseModel)
+ListSchemaType = TypeVar("ListSchemaType", bound=BaseModel)
+CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstract):
@@ -12,8 +21,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], CRUDAbstr
     **Parameters**
     * `model`: A SQLAlchemy model class
     * `schema`: A Pydantic model (schema) class
+    * `update_schema`: A Pydantic update model (schema) class
     * `list_schema`: A list of Pydantic models
+    * `database`: SQLAlchemy session
     """
+    def __init__(self, model: Type[ModelType], schema: Type[BaseSchemaType],
+                 update_schema: Type[UpdateSchemaType], list_schema: Type[ListSchemaType],
+                 database=db.session):
+        self.model = model
+        self.schema = schema
+        self.list_schema = list_schema
+        self.update_schema = update_schema
+        self.database = database
 
     def get(self, record_id: Any) -> Optional[BaseSchemaType]:
         """Method to read one record by id"""

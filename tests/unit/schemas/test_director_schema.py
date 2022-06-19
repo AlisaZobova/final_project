@@ -26,7 +26,7 @@ from app.schemas import DirectorBase
             "surname": "4"
         })
     ])
-def test_validate_director(app_with_db, data):
+def test_validate_director(data):
     """Checking for a validation error when entering invalid data"""
     with pytest.raises(ValidationError):
         DirectorBase.parse_obj(data)

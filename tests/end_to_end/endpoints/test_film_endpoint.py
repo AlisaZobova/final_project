@@ -93,6 +93,19 @@ def test_create_film_no_auth(app_with_data, data):
             "genres": "4"
         },
          400
+        ),
+        ({
+            "title": "Jacky",
+            "poster": "https://www.posters.net/Peaky-Blinders-poster/rrrrrrrr"
+                      "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",
+            "description": "A gangster family epic set in 1900s England.",
+            "release_date": "2013-09-12",
+            "rating": 9.5,
+            "user_id": 4,
+            "directors": "1&10",
+            "genres": "4"
+        },
+         400
         )
     ]
 )
@@ -119,6 +132,10 @@ def test_create_film_auth(app_with_data, data, code):
     if code == 201:
         count = len(db.session.query(Film).filter(Film.title == data['title']).all())
         assert count == 1
+
+        title = response.json['title']
+        user_id = db.session.query(Film.user_id).filter(Film.title == title).first()[0]
+        assert user_id == 11
 
     app_with_data.get(
         url_for("api.authentication_logout")
