@@ -38,15 +38,9 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     """Update schema"""
     role_id: Optional[int] = None
-    password: Optional[constr(max_length=255)] = None
     name: Optional[constr(max_length=50)] = None
     email: Optional[EmailStr] = None
-
-
-class UserInDBBase(UserBase):
-    """Database schema"""
-    user_id: int
-    role_id: int
+    password: Optional[constr(max_length=255)] = None
 
 
 class UserList(BaseModel):

@@ -43,6 +43,7 @@ class User(Resource):
         except ValueError:
             logger.error("Attempt to create user with email that already exist.")
             user_ns.abort(400, "User with such email already exist.")
+            return None
 
     @user_ns.doc(
         params={'user_id': 'An ID'},
@@ -59,6 +60,7 @@ class User(Resource):
         except ValueError:
             logger.error("Attempt to update the email to the one that is already in the database.")
             user_ns.abort(400, "User with such email already exist.")
+            return None
 
     @user_ns.doc(
         params={'user_id': 'An ID'},

@@ -23,6 +23,7 @@ class TodoBase:
         except ValidationError:
             logger.error("Attempt to get record with id %d, that doesn't exist.", record_id)
             api.abort(404, message=f"Record with id {record_id} doesn't exist.")
+            return None
 
     def create(self, crud: CRUDAbstract, t_name: str):
         """Method for future post request"""
@@ -35,6 +36,7 @@ class TodoBase:
             logger.error("Incorrect data entered. "
                          "The record in %s table could not be created.", t_name)
             api.abort(400, "Incorrect data entered. The record could not be created.")
+            return None
 
     def update(self, record_id: int, crud: CRUDAbstract, t_name: str):
         """Method for future put request"""
@@ -47,10 +49,12 @@ class TodoBase:
             logger.error("Incorrect data entered. "
                          "The record in %s table could not be updated.", t_name)
             api.abort(400, "Incorrect data entered. The record could not be updated.")
+            return None
         except TypeError:
             logger.error('Attempt to update record with id %s in %s table, '
                          'but record does not exist.', record_id, t_name)
             api.abort(404, message=f"Record with id {record_id} doesn't exist.")
+            return None
 
     def delete(self, crud: CRUDAbstract, record_id: int, t_name: str):
         """Method for future delete request"""
@@ -62,6 +66,7 @@ class TodoBase:
             logger.error("Attempt to delete record from %s table with id %d, "
                          "that doesn't exist.", t_name, record_id)
             api.abort(404, message=f"Record with id {record_id} doesn't exist.")
+            return None
 
     def read_all(
             self, crud: CRUDAbstract, page: int, per_page: int, t_name: str
@@ -77,6 +82,7 @@ class TodoBase:
         except NotFound:
             logger.warning("No more records in %s table.", t_name)
             api.abort(404, message=f"No more records in {t_name} table.")
+            return None
 
 
 todo = TodoBase()

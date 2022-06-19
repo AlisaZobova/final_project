@@ -125,10 +125,12 @@ class FilmBase(Resource):
             logger.error("Incorrect data entered. "
                          "The record in film table could not be created. %s", error)
             film_ns.abort(400, message="Incorrect data entered. The record could not be created.")
+            return None
 
         except ValueError:
             logger.error("Attempt to create film with title that already exist.")
             film_ns.abort(400, "Film with such title already exist.")
+            return None
 
     def del_put_access(self, film_id: int, action: str):
         """Check access to put and post methods"""
@@ -166,10 +168,12 @@ class FilmBase(Resource):
             logger.error('Attempt to update record with id %d in film table, '
                          'but record does not exist.', film_id)
             film_ns.abort(404, message=f"Record with id {film_id} doesn't exist.")
+            return None
 
         except ValueError:
             logger.error("Attempt to update film title to the one that is already in the database.")
             film_ns.abort(400, "Film with such title already exist.")
+            return None
 
     @film_ns.doc(
         params={'film_id': 'An ID'},
@@ -189,6 +193,7 @@ class FilmBase(Resource):
             logger.error('Attempt to delete record with id %d in film table, '
                          'but record does not exist.', film_id)
             film_ns.abort(404, message=f"Record with id {film_id} doesn't exist.")
+            return None
 
 
 @film_ns.route('/all/<int:page>', methods=['GET'],
@@ -207,7 +212,8 @@ class Films(Resource):
             return jsonify(set_unknown_director_multy(films)['__root__'])
         except NotFound:
             logger.warning("No more records in film table.")
-            film_ns.abort(404, message=f"No more records in film table.")
+            film_ns.abort(404, message="No more records in film table.")
+            return None
 
 
 @film_ns.route('/<string:title>/<int:page>', methods=['GET'],
@@ -231,8 +237,9 @@ class FilmsTitle(Resource):
             return jsonify(set_unknown_director_multy(films)['__root__'])
         except NotFound:
             logger.warning("No more records corresponding to the request in film table.")
-            film_ns.abort(404, message=f"No more records corresponding "
-                                       f"to the request in film table.")
+            film_ns.abort(404, message="No more records corresponding "
+                                       "to the request in film table.")
+            return None
 
 
 @film_ns.route('/filter/<int:page>', methods=['GET'],
@@ -263,8 +270,9 @@ class FilmsFiltered(Resource):
             return jsonify(set_unknown_director_multy(films)['__root__'])
         except NotFound:
             logger.warning("No more records corresponding to the request in film table.")
-            film_ns.abort(404, message=f"No more records corresponding "
-                                       f"to the request in film table.")
+            film_ns.abort(404, message="No more records corresponding "
+                                       "to the request in film table.")
+            return None
 
 
 @film_ns.route('/sort/<int:page>', methods=['GET'],
@@ -292,5 +300,6 @@ class FilmsSorted(Resource):
             return jsonify(set_unknown_director_multy(films)['__root__'])
         except NotFound:
             logger.warning("No more records corresponding to the request in film table.")
-            film_ns.abort(404, message=f"No more records corresponding "
-                                       f"to the request in film table.")
+            film_ns.abort(404, message="No more records corresponding "
+                                       "to the request in film table.")
+            return None

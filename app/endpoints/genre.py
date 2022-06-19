@@ -35,6 +35,7 @@ class Genre(Resource):
         except ValueError:
             logger.error("Attempt to create genre with name that already exist.")
             genre_ns.abort(400, "Genre with such name already exist.")
+            return None
 
     @genre_ns.doc(
         params={'genre_id': 'An ID'},
@@ -52,6 +53,7 @@ class Genre(Resource):
             logger.error("Attempt to update the genre name to the one "
                          "that is already in the database.")
             genre_ns.abort(400, "Genre with such name already exist.")
+            return None
 
     @genre_ns.doc(
         params={'genre_id': 'An ID'},

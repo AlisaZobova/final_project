@@ -1,17 +1,11 @@
-create_db:
-	sudo docker-compose exec database psql -U postgres -c "CREATE DATABASE film_library;"
-
-init:
-	flask db init
-
 migrate:
-	flask db migrate
+	sudo docker exec -it flask flask db migrate
 
 upgrade:
-	flask db upgrade
+	sudo docker exec -it flask flask db upgrade
 
 downgrade:
-	flask db downgrade
+	sudo docker exec -it flask flask db downgrade
 
 up_d:
 	sudo docker compose up -d
@@ -56,7 +50,7 @@ test_db:
 	sudo docker-compose exec test-database psql --username=postgres --dbname=film_library_test
 
 run_pylint:
-	pylint $(git ls-files '*.py')
+	pylint ./app
 
 seed:
 	sudo docker exec -it flask flask seed_all

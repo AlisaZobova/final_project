@@ -3,7 +3,7 @@
 from faker import Faker
 from flask import Blueprint
 from .crud import director, film, genre, user
-from .models import Director, Genre, Role
+from .models import Role
 from .models.db_init import db
 
 cmd = Blueprint('cmd', __name__, cli_group=None)
@@ -55,8 +55,8 @@ def seed_film():
         }
         film.create(
             obj_in=film_values,
-            directors=[db.session.query(Director).get(dir_id) for dir_id in directors_id],
-            genres=[db.session.query(Genre).get(genre_id) for genre_id in genres_id]
+            directors=list(directors_id),
+            genres=list(genres_id)
         )
 
 

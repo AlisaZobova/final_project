@@ -59,12 +59,6 @@ class FilmUpdate(FilmBase):
     genres: Optional[List[GenreBase]] = None
 
 
-class FilmInDBBase(FilmBase):
-    """Database schema"""
-    film_id: int
-    user_id: int
-
-
 class FilmList(BaseModel):
     """List of base schema objects schema"""
     __root__: List[FilmBase]
