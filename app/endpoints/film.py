@@ -82,6 +82,7 @@ class FilmBase(Resource):
     """Class for implementing film HTTP requests"""
 
     @film_ns.doc(
+        model=film_model,
         params={'film_id': 'An ID'},
         responses={200: 'Success', 404: 'Not Found'}
     )
@@ -249,7 +250,7 @@ class FilmsFiltered(Resource):
     """Class for implementing films get multy filtered request"""
     @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page, per_page):
-        """Get all records from the film table filtered by genres, release_date and directors"""
+        """Get all records from the film table filtered by genres, release date and directors"""
         data = [request.args.get('release_date', default=None),
                 request.args.get('directors', default=None),
                 request.args.get('genres', default=None)]
@@ -279,7 +280,7 @@ class FilmsSorted(Resource):
     """Class for implementing films get multy sorted request"""
     @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page: int, per_page: int):
-        """Get all records from the film table sorted by release_date and rating"""
+        """Get all records from the film table sorted by release date and rating"""
         order = [request.args.get('release_date', default=None),
                  request.args.get('rating', default=None)]
         try:

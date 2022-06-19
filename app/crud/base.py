@@ -1,6 +1,6 @@
 """Module with base CRUD realisation"""
 
-from typing import Any, Dict, Generic, List, Optional, Union, Type, TypeVar
+from typing import Any, Dict, Generic, Optional, Union, Type, TypeVar
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
