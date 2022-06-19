@@ -49,8 +49,7 @@ def test_create_user(app_with_data, data, code):
     the status code and adding this record to the database
     """
     # when
-    response = app_with_data.post(url_for("api.user_create"),
-                                  json=data)
+    response = app_with_data.post(url_for("api.user_create"), json=data)
 
     # then
     assert response.status_code == code
@@ -101,8 +100,7 @@ def test_get_user_by_id(app_with_data, user_id, code):
 def test_update_user_by_id(app_with_data, user_id, data, code):
     """Checks the data after updating and matches the status code"""
     # when
-    response = app_with_data.put(url_for("api.user", user_id=user_id),
-                                 json=data)
+    response = app_with_data.put(url_for("api.user", user_id=user_id), json=data)
     users = db.session.query(User).get(6).__dict__
     logger.info("%s", str(users))
     # then
@@ -120,8 +118,7 @@ def test_get_all_users_default(app_with_data, page, count, code):
     """Checks the number of records received and status code"""
     # when
     response = app_with_data.get(
-        url_for("api.users_default",
-                page=page, per_page=None)
+        url_for("api.users_default", page=page, per_page=None)
     )
 
     # then

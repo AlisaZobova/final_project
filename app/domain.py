@@ -32,7 +32,7 @@ def delete(crud: CRUDAbstract, record_id: int):
     return crud.remove(record_id=record_id)
 
 
-def set_unknown_director(film):
+def set_unknown_director(film: Dict[str, Any]) -> Dict[str, Any]:
     """Set directors = UNKNOWN if film has no any director"""
     if not bool(film['directors']):
         film['directors'] = 'UNKNOWN'
@@ -51,7 +51,7 @@ def create_film(
     return film
 
 
-def set_unknown_director_multy(films: Dict):
+def set_unknown_director_multy(films: Dict[str, List]) -> Dict[str, List]:
     """Set directors = UNKNOWN if film has no any director"""
     for film in films['__root__']:
         if not bool(film['directors']):

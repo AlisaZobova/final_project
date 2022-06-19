@@ -53,7 +53,7 @@ class Login(Resource):
 @login_required
 @auth.route('/logout', methods=['GET'])
 class Logout(Resource):
-    """Class with method rof user logout"""
+    """Class with method for user logout"""
     @auth.response(200, 'Success')
     @auth.response(401, 'Unauthorized')
     def get(self):

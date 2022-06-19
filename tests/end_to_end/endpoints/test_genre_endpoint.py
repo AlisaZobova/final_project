@@ -31,8 +31,7 @@ def test_create_genre(app_with_data, data, code):
     the status code and adding this record to the database
     """
     # when
-    response = app_with_data.post(url_for("api.genre_create"),
-                                  json=data)
+    response = app_with_data.post(url_for("api.genre_create"), json=data)
 
     # then
     assert response.status_code == code
@@ -76,8 +75,7 @@ def test_get_genre_by_id(app_with_data, genre_id, code):
 def test_update_genre_by_id(app_with_data, genre_id, data, code):
     """Checks the data after updating and matches the status code"""
     # when
-    response = app_with_data.put(url_for("api.genre", genre_id=genre_id),
-                                 json=data)
+    response = app_with_data.put(url_for("api.genre", genre_id=genre_id), json=data)
 
     # then
     assert response.status_code == code
@@ -94,8 +92,7 @@ def test_get_all_genres_default(app_with_data, page, count, code):
     """Checks the number of records received and status code"""
     # when
     response = app_with_data.get(
-        url_for("api.genres_default",
-                page=page, per_page=None)
+        url_for("api.genres_default", page=page, per_page=None)
     )
 
     # then

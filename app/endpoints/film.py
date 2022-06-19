@@ -216,7 +216,7 @@ class Films(Resource):
 @film_ns.doc(params={'page': 'Page number', 'per_page': 'Number of entries per page',
                      'title': "Part of the film's title"})
 class FilmsTitle(Resource):
-    """Class for implementing films get multy request"""
+    """Class for implementing films get multy by title request"""
     @film_ns.doc(responses={200: 'Success', 404: 'Not Found'})
     def get(self, page, per_page, title):
         """Get all records from the film table by partial coincidence of title"""

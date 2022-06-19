@@ -17,7 +17,10 @@ from app.schemas import UserBase
      UserBase)
 ])
 def test_create(app_with_data, data, expected_type):
-    """Checking the function of creating a record"""
+    """
+    Checking the function of creating a record and comparison of
+    the number of records before and after applying the function
+    """
     before = len(db.session.query(User).all())
     new_user = user.create(obj_in=data)
     after = len(db.session.query(User).all())
@@ -69,7 +72,7 @@ def test_update(app_with_data):
 
 
 def test_update_error(app_with_data):
-    """Checking that an entry cannot be created  with a duplicate email and an error occurs"""
+    """Checking that an entry cannot be updated with a duplicate email and an error occurs"""
     with pytest.raises(ValueError):
         user.update(record_id=10, obj_in={
             "name": "Jack",

@@ -1,4 +1,4 @@
-"""Module with DIRECTOR CRUD realisation"""
+"""Module with director CRUD realisation"""
 
 from app.models import Director, Film
 from app.schemas.director import DirectorCreate, DirectorUpdate, DirectorBase, DirectorList
@@ -7,7 +7,7 @@ from .base import CRUDBase
 
 class CRUDDirector(CRUDBase[Director, DirectorCreate, DirectorUpdate]):
     """A class that inherits the base CRUD class
-    to perform CRUD operations for the DIRECTOR model"""
+    to perform CRUD operations for the director model"""
 
     def remove(self, *, record_id: int) -> DirectorBase:
         """Method to delete one record by id and records with it in the associative table"""
