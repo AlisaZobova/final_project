@@ -39,11 +39,6 @@ class DirectorUpdate(DirectorBase):
     surname: Optional[constr(max_length=50)] = None
 
 
-class DirectorInDBBase(DirectorBase):
-    """Database schema"""
-    director_id: int
-
-
 class DirectorList(BaseModel):
     """List of base schema objects schema"""
     __root__: List[DirectorBase]

@@ -40,7 +40,6 @@ services:
         container_name: nginx
 
     flask:
-        image: flask
         build:
             context: ./
             dockerfile: Dockerfile

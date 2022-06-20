@@ -48,6 +48,7 @@ class Login(Resource):
         except AttributeError:
             auth.logger.error('Not all authentication information received.')
             auth.abort(400, "Please enter your email and password.")
+            return None
 
 
 @login_required
@@ -67,3 +68,4 @@ class Logout(Resource):
         except AttributeError:
             auth.logger.error('No authorized users found. Logout impossible.')
             auth.abort(401, "No authorized users found!")
+            return None
